@@ -1,0 +1,13 @@
+[input]
+base_directory = "output"
+html_selector = "main"
+
+[[input.files]]
+path = "second-entry.html"
+url = "/second-entry.html"
+title = "Second Entry"
+
+[[input.files]]
+path = "first-entry.html"
+url = "/first-entry.html"
+title = "First Entry"
