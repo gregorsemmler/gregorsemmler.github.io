@@ -3,11 +3,11 @@ base_directory = "output"
 html_selector = "main"
 
 [[input.files]]
-path = "second-entry.html"
-url = "/second-entry.html"
-title = "Second Entry"
+path = "how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html"
+url = "/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html"
+title = "How a robot can learn to drive in less than ten trials"
 
 [[input.files]]
-path = "first-entry.html"
-url = "/first-entry.html"
-title = "First Entry"
+path = "a-brief-introduction-to-reinforcement-learning.html"
+url = "/a-brief-introduction-to-reinforcement-learning.html"
+title = "A brief introduction to Reinforcement Learning"

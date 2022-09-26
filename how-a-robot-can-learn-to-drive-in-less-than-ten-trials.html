@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Gregor Semmler" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content=", Entry, " />
+
+<meta property="og:title" content="How a robot can learn to drive in less than ten trials "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html" />
+<meta property="og:description" content="Although reinforcement learning1 has achievement remarkable, superhuman results in various applications like AlphaGo these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources …" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Website" />
+<meta property="og:article:author" content="Gregor Semmler" />
+<meta property="og:article:published_time" content="2022-09-13T18:27:00+02:00" />
+<meta name="twitter:title" content="How a robot can learn to drive in less than ten trials ">
+<meta name="twitter:description" content="Although reinforcement learning1 has achievement remarkable, superhuman results in various applications like AlphaGo these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources …">
+
+        <title>How a robot can learn to drive in less than ten trials  · Gregor Semmler&#39;s Website
+</title>
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Website - Full Atom Feed" />
+
+
+
+        <link rel="stylesheet" href="https://files.stork-search.net/basic.css" />
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Website</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://gregorsemmler.github.io
+                                    >Home</a>
+                                </li>
+                                <!-- <li ><a href="https://gregorsemmler.github.io/categories">Categories</a></li> -->
+                                <!-- <li ><a href="https://gregorsemmler.github.io/tags">Tags</a></li> -->
+                                <li ><a href="https://gregorsemmler.github.io/archives">Archives</a></li>
+                                <!-- <li><form class="navbar-search" action="https://gregorsemmler.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li> -->
+                                <input class="navbar-search search-query" data-stork="sitesearch" type="text" placeholder="Search"/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div data-stork="sitesearch-output"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<main>
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html">
+                How a robot can learn to drive in less than ten trials
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Although reinforcement learning<sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"><a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning">1</a></sup> has achievement remarkable, superhuman results in various applications like <a href="https://www.youtube.com/watch?v=WXuK6gekU1Y">AlphaGo</a> these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources. However, it is generally more difficult to make an approach work in a real-world application.</p>
+<p>In those cases there are two main approaches:</p>
+<ol>
+<li>Simulate the environment as closely as possible, solve the problem in the simulation, then apply this solution to the real situation.</li>
+<li>Try to solve the problem in the real world application itself, as efficiently as possible based on the actually gathered data.</li>
+</ol>
+<p>Firstly, in a particular application there might not be the time or the resources to make an accurate simulation of the real situation. Secondly, there is often a gap between simulation and reality where even the smallest deviation in the simulation can lead to significantly different outcomes.</p>
+<p>For sample-efficient approaches, we will therefore consider the second solution, in particular using model-based reinforcement learning such that, in this case, a robot can learn on its own to drive in just a few trials.</p>
+<h2>Model-Based Reinforcement Learning</h2>
+<p><em>Model-based</em> methods primarily use a <em>model</em> to <em>plan</em>, while <em>model-free</em> methods use <em>learning</em>. A <em>model</em> of the environment is everything the agent can use to predict how the environment will respond to its actions. Given a state and action, the model predicts the next state (and optionally) the next reward. The model can be used to simulate interactions and produce <em>simulated experience</em>. <em>Planning</em> here describes any approach which takes a model as input and produces, or improves a policy for the actual interaction with the environment.</p>
+<p>Here, states are defined as <span class="math">\(s \in \mathbb{R}^{d_s}\)</span> and the actions as <span class="math">\(a \in \mathbb{R}^{d_a}\)</span>. The dynamics function <span class="math">\(f_\theta : \mathbb{R}^{d_s + d_a} \mapsto \mathbb{R}^{d_s}\)</span> of the environment maps the current state <span class="math">\(s_t\)</span> and the action <span class="math">\(a_t\)</span> to a new state <span class="math">\(s_{t+1}\)</span> such that <span class="math">\(s_{t+1} = f\left(s_t,a_t\right)\)</span>. Assuming probabilistic dynamics, <span class="math">\(s_{t+1}\)</span> will be given by the conditional distribution <span class="math">\(\mathrm{Pr}(s_{t+1}|s_t, a_t; \theta)\)</span>.</p>
+<p>The dynamics are learned by finding an approximation <span class="math">\(\tilde{f}\)</span> of the true transition function <span class="math">\(f\)</span>, given the dataset <span class="math">\(\mathbb{D} = \left\{(s_n, a_n), s_{n+1}\right\}_{n=1}^N\)</span>.</p>
+<p>In general, this model can then be used to predict how the environment will change over the following time steps und use this to optimize over which actions to take to achieve the highest return. With a <em>probabilistic</em> dynamics model <span class="math">\(\tilde{f}\)</span> we get a distribution over the possible future state trajectories <span class="math">\(s_{t:t+T}\)</span>. </p>
+<h2>Probabilistic Neural Network Ensembles</h2>
+<p>An ensemble consists of a set of multiple machine learning models. A <em>probabilistic</em> neural network is a network that parameterizes a probability distribution, which allows sampling from. On the other hand, a <em>deterministic</em> neural network gives a point prediction, so every input will always result in the same output.</p>
+<p>The loss function used here is the negative log likelihood <span class="math">\(\mathrm{loss}_P(\theta) = - \sum_{n=1}^{N} \mathrm{log}\:\tilde{f}_\theta(s_{n+1}|s_n, a_n)\)</span>. In this case, we will have the neural networks parameterize a multivariate Gaussian distribution with diagonal covariances, so <span class="math">\(\mathrm{Pr}(s_{t+1}|s_t, a_t; \theta) = \mathcal{N}\left(\mu_\theta(s_t, a_t), \Sigma_\theta(s_t, a_t)\right)\)</span> meaning the loss is the Gaussian negative log likelihood:</p>
+<p><span class="math">\(\mathrm{loss}_\mathrm{Gauss}(\theta) = \sum_{n=1}^N \left[\mu_\theta(s_n, a_n) - s_{n+1}\right]^\mathsf{T}\Sigma^{-1}_\theta(s_n, a_n)\left[\mu_\theta(s_n, a_n) - s_{n+1}\right] + \mathrm{log}\:\mathrm{det}\:\Sigma_\theta(s_n, a_n)\)</span> ([2])</p>
+<p>In the following example we can see a sine curve (blue) being approximated by a probabilistic neural network ensemble with 5 members trained with this loss.</p>
+<p><img alt="Combined ensemble output" src="https://gregorsemmler.github.io/images/sample_efficient_rl/ensemble_example_combined.png"></p>
+<p>The green dots represent the training data, parts of the original data with added random gaussian noise. The red line represents the mean of the ensemble prediction, while the shaded red area represent one standard deviation around the prediction. One can see that the mean of the prediction is fairly accurate for the areas where lots of training data is available, while deviating further in the middle of the plot where it isn't.</p>
+<p><img alt="Outputs for each ensemble member" src="https://gregorsemmler.github.io/images/sample_efficient_rl/ensemble_example_each.png"></p>
+<p>In the second plot, we can see the predictions from each member of the ensemble. Every ensemble member was trained on a subset of the training data which results in differing predictions.</p>
+<h2>Trajectory Sampling</h2>
+<p>The classic approach from dynamic programming to update a model of the environment is to perform sweeps over the state or state-action space, updating each once per sweep. On tasks with a large state-space this would take an unfeasible long time. Complete sweeps spend equal time on all parts of the state space, instead of putting more focus on important states.</p>
+<p>The second approach is to sample from the state or state-action space from some probability distribution. An intuitive solution is to sample from the one which is observed from the current policy. Which means starting from the start state we interact with the model and keep simulating until an end state is reached. The transitions are given by the model and actions are given by the current policy. This way of generating updates is called <em>trajectory sampling</em>.</p>
+<p>In this context, one can create multiple <em>particles</em> from a state, and keep simulating until a terminal state is reached. If trajectory sampling is performed on an ensemble, for each ensemble member multiple particles can be propagated and then the final results are amalgamated. This is the basic idea behind <em>probabilistic ensemble trajectory sampling</em> <a href="https://proceedings.neurips.cc/paper/2018/file/3de568f8597b94bda53149c7d7f5958c-Paper.pdf"><em>(PETS)</em></a>, one method we will be examining in more detail here. The central optimization within this algorithm is the Cross-Entropy Method (CEM).</p>
+<h2>Cross-Entropy Method (CEM) Optimizer</h2>
+<p><img alt="CEM Algorithm" src="https://gregorsemmler.github.io/images/sample_efficient_rl/cem_algorithm.png">(image from [3])</p>
+<p>The Cross-Entropy Method (CEM) is a stochastic and derivative-free optimization method, meaning it can solve problems without needing backpropagation. The CEM optimizer takes initial parameters <span class="math">\(\mu_0, \sigma_0\)</span> for a normal distribution. In each iteration, multiple samples are taken from the current distribution <span class="math">\(\mathcal{N}(\mu_t, \mathrm{diag}(\sigma_t^2))\)</span> which are inputs to a cost function. An elite set of the best performing samples are then used to update the current solution.</p>
+<h2>Probabilistic Ensemble Trajectory Sampling</h2>
+<p><img alt="PETS Algorithm" src="https://gregorsemmler.github.io/images/sample_efficient_rl/pets_algorithm.png">(image from [2])</p>
+<p>In simple terms, the PETS algorithm follows the following steps: At the beginning of each trial, train a probabilistic ensemble dynamics model <span class="math">\(\tilde{f}\)</span> given the currently available dataset. Then, repeat for each step in the trial:</p>
+<ol>
+<li>Sample actions <span class="math">\(a_{t:t+T}\)</span> from the current CEM distribution.</li>
+<li>Propagate the states particles <span class="math">\(s_\tau^p\)</span> through the ensemble given the actions using trajectory sampling.</li>
+<li>Get the average rewards over the particles and time steps: <span class="math">\(\sum_{\tau=t}^{t+T} \frac{1}{P} \sum_{p=1}^P r(s_\tau^p, a_\tau)\)</span></li>
+<li>Update the CEM distribution according to the best performing actions.</li>
+<li>Perform the first action <span class="math">\(a_t^*\)</span> from the CEM solution which we consider the optimal action.</li>
+<li>Add the state, action, next state, (and optionally reward) to the dataset.</li>
+</ol>
+<p>This is repeated until the desired return is achieved or a set number of trials is done.</p>
+<h2>Practical Experiment</h2>
+<p>To evaluate the approach, I am trying to get a robot to drive on its own. For this I am using a <a href="https://jetbot.org/master/index.html">JetBot</a>. It is based on the <a href="https://developer.nvidia.com/embedded/jetson-nano-developer-kit">Nvidia Jetson Nano Developer Kit</a>.</p>
+<p><img alt="JetBot" src="https://gregorsemmler.github.io/images/jetbot.jpg"></p>
+<p>The most important technical features are:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPU</td>
+<td>128-core Maxwell</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>Quad-core ARM A57 @ 1.43 GHz</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>4 GB 64-bit LPDDR4 25.6 GB/s</td>
+</tr>
+<tr>
+<td>Video Encode</td>
+<td>4K @ 30, 4x 1080p @ 30, 9x 720p @ 30 (H.264/H.265)</td>
+</tr>
+</tbody>
+</table>
+<p>The robot has two wheels controlled by two independent motors, a mounted camera and two wireless antennas. The operating system is Ubuntu 18.04.</p>
+<p>The task for the robot is to learn to drive on a mat without driving off. The traction of the wheels on the floor turned out to be too low by comparison. </p>
+<p><img alt="The area to drive on" src="https://gregorsemmler.github.io/images/sample_efficient_rl/mat.jpg"></p>
+<p>A separate classification model was trained to detect if the robot is driving off the mat, which is used to determine whether one episode is over. </p>
+<p>The reward is calculated as the amount of forward motor activation minus a threshold times a constant factor. The maximum speed is capped at <span class="math">\(a_{max} = 0.15\)</span> to avoid the robot from being damaged. This means the main task the robot gets is to drive forward (without leaving the mat).</p>
+<p><span class="math">\(r(s, a) = (a_l + a_r - 2 * a_{thresh}) * val_{mul}\)</span></p>
+<p>Where <span class="math">\(a = (a_l, a_r)\)</span> and <span class="math">\(a_l\)</span>, <span class="math">\(a_r\)</span> are the speed values for the left and the right motor and the <span class="math">\(a_{thresh}\)</span> is a threshold which the motor speed needs to have at minimum. The robot doesn't move forward if the speed is too low, the robot might learn to just stand still in that case. The values were <span class="math">\(a_{thresh} = 0.1\)</span> and <span class="math">\(val_{mul} = 10\)</span>.</p>
+<p>The only sensor input of the robot are raw camera input images with a width and height of 224 and 3 channels. For this reason, an Autoencoder was trained on a dataset of about 60,000 frames.  The encoder then encodes the input down to a dimension of 512, which is used as the input to the PETS algorithm. The robot was also limited to forward movements, as there is no camera in the back. </p>
+<p>The ensemble was made out of 5 neural networks, each consisting of two fully-connected layers with 512 members and the ELU activation function.</p>
+<p>The Adam optimizer with a learning rate of 1e-3 was used to train the ensemble for 5 epochs before each trial. In total, 10 trials were performed.</p>
+<p>For the CEM Optimizer, 500 samples were taken from the ensemble with 20 particles each, which were propagated 30 time steps into the future. The optimization was done for 5 iterations at each time step to get the final action to be taken.</p>
+<p>As only a few trials were performed, the replay buffer of size 25000 was never full, so all previous samples were used in each training run.</p>
+<h3>Results</h3>
+<p><img alt="Trial Return" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Trial Return.png">
+<img alt="Trial Length" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Trial Length.png"></p>
+<p>After 10 trials, the robot has successfully learned to drive forward based on the given inputs and reaches its highest return reward of 85.12 in the final trial. This is orders of magnitudes faster than classic methods which can easily take hundreds or thousands of episodes. </p>
+<p>At this point, the robot has only learned to drive forward as the reward function gives the highest reward for doing so, while a penalty is given if a motor is moving too slow. For this reason, taking a turn is also penalized, and as there is no penalty for ending the trial it has learned to rather drive to the end of the mat than to change course. A differently designed reward function would offset this behavior, for example by not penalizing slow motor activation.</p>
+<p><img alt="Training Epoch Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Training Epoch Loss.png">
+<img alt="Validation Epoch Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Validation Epoch Loss.png"></p>
+<p>The loss is steadily reduced over all epochs with a slight spike at the 25th epoch.</p>
+<p><img alt="Training Epoch Nll Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Training Epoch Nll Loss.png">
+<img alt="Training Epoch Log Std Limit Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Training Epoch Log Std Limit Loss.png"></p>
+<p><img alt="Validation Epoch Nll Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Validation Epoch Nll Loss.png">
+<img alt="Validation Epoch Log Std Limit Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Validation Epoch Log Std Limit Loss.png"></p>
+<p>In addition to the previously described negative log likelihood loss, there is an additional loss which allows the ensemble to learn limits to its output standard deviation / variance.<sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2-back"><a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2" class="simple-footnote" title="See here for how the standard deviation is limited in my implementation.">2</a></sup> This method was also described by the authors of the original PETS paper.
+It is also worthy of note that the nll loss can reach negative values. Once again, we can see a spike in the training nll loss at the 25th epoch up to a value close to 0 and otherwise a continuing decrease.</p>
+<h3>Videos</h3>
+<p>Initially the robot drives randomly over the mat:</p>
+<p><a href="http://www.youtube.com/watch?v=5zpn6nwvWA0" title="PETS JetBot initial random behavior"><img alt="JetBot initial random behavior" src="http://img.youtube.com/vi/5zpn6nwvWA0/0.jpg"></a></p>
+<p>In less than ten trials it has learned to drive forward on the mat:</p>
+<p><a href="http://www.youtube.com/watch?v=TIJcviz31Kg" title="PETS JetBot on mat trial 10"><img alt="JetBot on mat trial 10" src="http://img.youtube.com/vi/TIJcviz31Kg/0.jpg"></a></p>
+<p>We can conclude that the robot has learned to drive forward to maximize rewards. However, it has not yet learned to drive through a curve. One reason for this is, that the reward function is maximized by driving forward, while a curve is punished, as one of the wheels is not driving forward. No reward is lost by driving to the edge ending the trial. 
+Instead, the penalty for driving curves could be removed and a negative reward for the end of the trial added. This would encourage more of a circular motion, while staying on the mat. Alternatives to the CEM optimizer can also be considered for improved results.</p>
+<h2>Summary</h2>
+<p>This concludes my first introduction into sample efficient model-based reinforcement learning by presenting how the PETS algorithm can be used to help a robot to learn to drive by itself in less than 10 trials, based only on raw input images and a reward function in each state. On my GitHub profile I have provided <a href="https://github.com/gregorsemmler/pets/">my implementation of the algorithm</a>. </p>
+<h2>References</h2>
+<p>[1] R. S. Sutton and A. G. Barto. <em>Reinforcement learning: An introduction</em>. MIT Press, 2018.</p>
+<p>[2] K. Chua, et al. <em>Deep reinforcement learning in a handful of trials using probabilistic dynamics models</em>. Advances in neural information processing systems, 2018</p>
+<p>[3] C. Pinneri, et al. <em>Sample-efficient cross-entropy method for real-time planning</em>. arXiv preprint arXiv:2008.06389, 2020.</p>
+<h2>Footnotes</h2>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script><ol class="simple-footnotes"><li id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1">See also <a href="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html">my introduction to reinforcement learning</a> <a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back" class="simple-footnote-back">↩</a></li><li id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2">See <a href="https://github.com/gregorsemmler/pets/blob/master/model.py#L254-L258">here</a> for how the standard deviation is limited in my implementation. <a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2-back" class="simple-footnote-back">↩</a></li></ol>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2022-09-13T18:27:00+02:00">Di 13 September 2022</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+</main>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://gregorsemmler.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        <script src="https://files.stork-search.net/releases/v1.5.0/stork.js"></script>
+        <script>
+            stork.register("sitesearch", "https://gregorsemmler.github.io/search-index.st")
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

@@ -1,19 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gregor Semmler's Blog</title><link href="https://gregorsemmler.github.io/" rel="alternate"></link><link href="https://gregorsemmler.github.io/feeds/all.atom.xml" rel="self"></link><id>https://gregorsemmler.github.io/</id><updated>2022-08-26T15:30:00+02:00</updated><entry><title>Second Entry</title><link href="https://gregorsemmler.github.io/second-entry.html" rel="alternate"></link><published>2022-08-26T15:30:00+02:00</published><updated>2022-08-26T15:30:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-08-26:/second-entry.html</id><summary type="html">&lt;p&gt;Take what is yours.&lt;/p&gt;
-&lt;p&gt;&lt;span class="math"&gt;\(e = \sum\limits_{n = 0}^{\infty} \frac{1}{n!}\)&lt;/span&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gregor Semmler's Website</title><link href="https://gregorsemmler.github.io/" rel="alternate"></link><link href="https://gregorsemmler.github.io/feeds/all.atom.xml" rel="self"></link><id>https://gregorsemmler.github.io/</id><updated>2022-09-13T18:27:00+02:00</updated><entry><title>How a robot can learn to drive in less than ten trials</title><link href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html" rel="alternate"></link><published>2022-09-13T18:27:00+02:00</published><updated>2022-09-13T18:27:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-09-13:/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html</id><summary type="html">&lt;p&gt;Although reinforcement learning&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning"&gt;1&lt;/a&gt;&lt;/sup&gt; has achievement remarkable, superhuman results in various applications like &lt;a href="https://www.youtube.com/watch?v=WXuK6gekU1Y"&gt;AlphaGo&lt;/a&gt; these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Although reinforcement learning&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning"&gt;1&lt;/a&gt;&lt;/sup&gt; has achievement remarkable, superhuman results in various applications like &lt;a href="https://www.youtube.com/watch?v=WXuK6gekU1Y"&gt;AlphaGo&lt;/a&gt; these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources. However, it is generally more difficult to make an approach work in a real-world application.&lt;/p&gt;
+&lt;p&gt;In those cases there are two main approaches:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Simulate the environment as closely as possible, solve the problem in the simulation, then apply this solution to the real situation.&lt;/li&gt;
+&lt;li&gt;Try to solve the problem in the real world application itself, as efficiently as possible based on the actually gathered data.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Firstly, in a particular application there might not be the time or the resources to make an accurate simulation of the real situation. Secondly, there is often a gap between simulation and reality where even the smallest deviation in the simulation can lead to significantly different outcomes.&lt;/p&gt;
+&lt;p&gt;For sample-efficient approaches, we will therefore consider the second solution, in particular using model-based reinforcement learning such that, in this case, a robot can learn on its own to drive in just a few trials.&lt;/p&gt;
+&lt;h2&gt;Model-Based Reinforcement Learning&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;Model-based&lt;/em&gt; methods primarily use a &lt;em&gt;model&lt;/em&gt; to &lt;em&gt;plan&lt;/em&gt;, while &lt;em&gt;model-free&lt;/em&gt; methods use &lt;em&gt;learning&lt;/em&gt;. A &lt;em&gt;model&lt;/em&gt; of the environment is everything the agent can use to predict how the environment will respond to its actions. Given a state and action, the model predicts the next state (and optionally) the next reward. The model can be used to simulate interactions and produce &lt;em&gt;simulated experience&lt;/em&gt;. &lt;em&gt;Planning&lt;/em&gt; here describes any approach which takes a model as input and produces, or improves a policy for the actual interaction with the environment.&lt;/p&gt;
+&lt;p&gt;Here, states are defined as &lt;span class="math"&gt;\(s \in \mathbb{R}^{d_s}\)&lt;/span&gt; and the actions as &lt;span class="math"&gt;\(a \in \mathbb{R}^{d_a}\)&lt;/span&gt;. The dynamics function &lt;span class="math"&gt;\(f_\theta : \mathbb{R}^{d_s + d_a} \mapsto \mathbb{R}^{d_s}\)&lt;/span&gt; of the environment maps the current state &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; and the action &lt;span class="math"&gt;\(a_t\)&lt;/span&gt; to a new state &lt;span class="math"&gt;\(s_{t+1}\)&lt;/span&gt; such that &lt;span class="math"&gt;\(s_{t+1} = f\left(s_t,a_t\right)\)&lt;/span&gt;. Assuming probabilistic dynamics, &lt;span class="math"&gt;\(s_{t+1}\)&lt;/span&gt; will be given by the conditional distribution &lt;span class="math"&gt;\(\mathrm{Pr}(s_{t+1}|s_t, a_t; \theta)\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;The dynamics are learned by finding an approximation &lt;span class="math"&gt;\(\tilde{f}\)&lt;/span&gt; of the true transition function &lt;span class="math"&gt;\(f\)&lt;/span&gt;, given the dataset &lt;span class="math"&gt;\(\mathbb{D} = \left\{(s_n, a_n), s_{n+1}\right\}_{n=1}^N\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;In general, this model can then be used to predict how the environment will change over the following time steps und use this to optimize over which actions to take to achieve the highest return. With a &lt;em&gt;probabilistic&lt;/em&gt; dynamics model &lt;span class="math"&gt;\(\tilde{f}\)&lt;/span&gt; we get a distribution over the possible future state trajectories &lt;span class="math"&gt;\(s_{t:t+T}\)&lt;/span&gt;. &lt;/p&gt;
+&lt;h2&gt;Probabilistic Neural Network Ensembles&lt;/h2&gt;
+&lt;p&gt;An ensemble consists of a set of multiple machine learning models. A &lt;em&gt;probabilistic&lt;/em&gt; neural network is a network that parameterizes a probability distribution, which allows sampling from. On the other hand, a &lt;em&gt;deterministic&lt;/em&gt; neural network gives a point prediction, so every input will always result in the same output.&lt;/p&gt;
+&lt;p&gt;The loss function used here is the negative log likelihood &lt;span class="math"&gt;\(\mathrm{loss}_P(\theta) = - \sum_{n=1}^{N} \mathrm{log}\:\tilde{f}_\theta(s_{n+1}|s_n, a_n)\)&lt;/span&gt;. In this case, we will have the neural networks parameterize a multivariate Gaussian distribution with diagonal covariances, so &lt;span class="math"&gt;\(\mathrm{Pr}(s_{t+1}|s_t, a_t; \theta) = \mathcal{N}\left(\mu_\theta(s_t, a_t), \Sigma_\theta(s_t, a_t)\right)\)&lt;/span&gt; meaning the loss is the Gaussian negative log likelihood:&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(\mathrm{loss}_\mathrm{Gauss}(\theta) = \sum_{n=1}^N \left[\mu_\theta(s_n, a_n) - s_{n+1}\right]^\mathsf{T}\Sigma^{-1}_\theta(s_n, a_n)\left[\mu_\theta(s_n, a_n) - s_{n+1}\right] + \mathrm{log}\:\mathrm{det}\:\Sigma_\theta(s_n, a_n)\)&lt;/span&gt; ([2])&lt;/p&gt;
+&lt;p&gt;In the following example we can see a sine curve (blue) being approximated by a probabilistic neural network ensemble with 5 members trained with this loss.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Combined ensemble output" src="https://gregorsemmler.github.io/images/sample_efficient_rl/ensemble_example_combined.png"&gt;&lt;/p&gt;
+&lt;p&gt;The green dots represent the training data, parts of the original data with added random gaussian noise. The red line represents the mean of the ensemble prediction, while the shaded red area represent one standard deviation around the prediction. One can see that the mean of the prediction is fairly accurate for the areas where lots of training data is available, while deviating further in the middle of the plot where it isn't.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Outputs for each ensemble member" src="https://gregorsemmler.github.io/images/sample_efficient_rl/ensemble_example_each.png"&gt;&lt;/p&gt;
+&lt;p&gt;In the second plot, we can see the predictions from each member of the ensemble. Every ensemble member was trained on a subset of the training data which results in differing predictions.&lt;/p&gt;
+&lt;h2&gt;Trajectory Sampling&lt;/h2&gt;
+&lt;p&gt;The classic approach from dynamic programming to update a model of the environment is to perform sweeps over the state or state-action space, updating each once per sweep. On tasks with a large state-space this would take an unfeasible long time. Complete sweeps spend equal time on all parts of the state space, instead of putting more focus on important states.&lt;/p&gt;
+&lt;p&gt;The second approach is to sample from the state or state-action space from some probability distribution. An intuitive solution is to sample from the one which is observed from the current policy. Which means starting from the start state we interact with the model and keep simulating until an end state is reached. The transitions are given by the model and actions are given by the current policy. This way of generating updates is called &lt;em&gt;trajectory sampling&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;In this context, one can create multiple &lt;em&gt;particles&lt;/em&gt; from a state, and keep simulating until a terminal state is reached. If trajectory sampling is performed on an ensemble, for each ensemble member multiple particles can be propagated and then the final results are amalgamated. This is the basic idea behind &lt;em&gt;probabilistic ensemble trajectory sampling&lt;/em&gt; &lt;a href="https://proceedings.neurips.cc/paper/2018/file/3de568f8597b94bda53149c7d7f5958c-Paper.pdf"&gt;&lt;em&gt;(PETS)&lt;/em&gt;&lt;/a&gt;, one method we will be examining in more detail here. The central optimization within this algorithm is the Cross-Entropy Method (CEM).&lt;/p&gt;
+&lt;h2&gt;Cross-Entropy Method (CEM) Optimizer&lt;/h2&gt;
+&lt;p&gt;&lt;img alt="CEM Algorithm" src="https://gregorsemmler.github.io/images/sample_efficient_rl/cem_algorithm.png"&gt;(image from [3])&lt;/p&gt;
+&lt;p&gt;The Cross-Entropy Method (CEM) is a stochastic and derivative-free optimization method, meaning it can solve problems without needing backpropagation. The CEM optimizer takes initial parameters &lt;span class="math"&gt;\(\mu_0, \sigma_0\)&lt;/span&gt; for a normal distribution. In each iteration, multiple samples are taken from the current distribution &lt;span class="math"&gt;\(\mathcal{N}(\mu_t, \mathrm{diag}(\sigma_t^2))\)&lt;/span&gt; which are inputs to a cost function. An elite set of the best performing samples are then used to update the current solution.&lt;/p&gt;
+&lt;h2&gt;Probabilistic Ensemble Trajectory Sampling&lt;/h2&gt;
+&lt;p&gt;&lt;img alt="PETS Algorithm" src="https://gregorsemmler.github.io/images/sample_efficient_rl/pets_algorithm.png"&gt;(image from [2])&lt;/p&gt;
+&lt;p&gt;In simple terms, the PETS algorithm follows the following steps: At the beginning of each trial, train a probabilistic ensemble dynamics model &lt;span class="math"&gt;\(\tilde{f}\)&lt;/span&gt; given the currently available dataset. Then, repeat for each step in the trial:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Sample actions &lt;span class="math"&gt;\(a_{t:t+T}\)&lt;/span&gt; from the current CEM distribution.&lt;/li&gt;
+&lt;li&gt;Propagate the states particles &lt;span class="math"&gt;\(s_\tau^p\)&lt;/span&gt; through the ensemble given the actions using trajectory sampling.&lt;/li&gt;
+&lt;li&gt;Get the average rewards over the particles and time steps: &lt;span class="math"&gt;\(\sum_{\tau=t}^{t+T} \frac{1}{P} \sum_{p=1}^P r(s_\tau^p, a_\tau)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;Update the CEM distribution according to the best performing actions.&lt;/li&gt;
+&lt;li&gt;Perform the first action &lt;span class="math"&gt;\(a_t^*\)&lt;/span&gt; from the CEM solution which we consider the optimal action.&lt;/li&gt;
+&lt;li&gt;Add the state, action, next state, (and optionally reward) to the dataset.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This is repeated until the desired return is achieved or a set number of trials is done.&lt;/p&gt;
+&lt;h2&gt;Practical Experiment&lt;/h2&gt;
+&lt;p&gt;To evaluate the approach, I am trying to get a robot to drive on its own. For this I am using a &lt;a href="https://jetbot.org/master/index.html"&gt;JetBot&lt;/a&gt;. It is based on the &lt;a href="https://developer.nvidia.com/embedded/jetson-nano-developer-kit"&gt;Nvidia Jetson Nano Developer Kit&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="JetBot" src="https://gregorsemmler.github.io/images/jetbot.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;The most important technical features are:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Feature&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;GPU&lt;/td&gt;
+&lt;td&gt;128-core Maxwell&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;CPU&lt;/td&gt;
+&lt;td&gt;Quad-core ARM A57 @ 1.43 GHz&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Memory&lt;/td&gt;
+&lt;td&gt;4 GB 64-bit LPDDR4 25.6 GB/s&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Video Encode&lt;/td&gt;
+&lt;td&gt;4K @ 30, 4x 1080p @ 30, 9x 720p @ 30 (H.264/H.265)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The robot has two wheels controlled by two independent motors, a mounted camera and two wireless antennas. The operating system is Ubuntu 18.04.&lt;/p&gt;
+&lt;p&gt;The task for the robot is to learn to drive on a mat without driving off. The traction of the wheels on the floor turned out to be too low by comparison. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="The area to drive on" src="https://gregorsemmler.github.io/images/sample_efficient_rl/mat.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;A separate classification model was trained to detect if the robot is driving off the mat, which is used to determine whether one episode is over. &lt;/p&gt;
+&lt;p&gt;The reward is calculated as the amount of forward motor activation minus a threshold times a constant factor. The maximum speed is capped at &lt;span class="math"&gt;\(a_{max} = 0.15\)&lt;/span&gt; to avoid the robot from being damaged. This means the main task the robot gets is to drive forward (without leaving the mat).&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(r(s, a) = (a_l + a_r - 2 * a_{thresh}) * val_{mul}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Where &lt;span class="math"&gt;\(a = (a_l, a_r)\)&lt;/span&gt; and &lt;span class="math"&gt;\(a_l\)&lt;/span&gt;, &lt;span class="math"&gt;\(a_r\)&lt;/span&gt; are the speed values for the left and the right motor and the &lt;span class="math"&gt;\(a_{thresh}\)&lt;/span&gt; is a threshold which the motor speed needs to have at minimum. The robot doesn't move forward if the speed is too low, the robot might learn to just stand still in that case. The values were &lt;span class="math"&gt;\(a_{thresh} = 0.1\)&lt;/span&gt; and &lt;span class="math"&gt;\(val_{mul} = 10\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;The only sensor input of the robot are raw camera input images with a width and height of 224 and 3 channels. For this reason, an Autoencoder was trained on a dataset of about 60,000 frames.  The encoder then encodes the input down to a dimension of 512, which is used as the input to the PETS algorithm. The robot was also limited to forward movements, as there is no camera in the back. &lt;/p&gt;
+&lt;p&gt;The ensemble was made out of 5 neural networks, each consisting of two fully-connected layers with 512 members and the ELU activation function.&lt;/p&gt;
+&lt;p&gt;The Adam optimizer with a learning rate of 1e-3 was used to train the ensemble for 5 epochs before each trial. In total, 10 trials were performed.&lt;/p&gt;
+&lt;p&gt;For the CEM Optimizer, 500 samples were taken from the ensemble with 20 particles each, which were propagated 30 time steps into the future. The optimization was done for 5 iterations at each time step to get the final action to be taken.&lt;/p&gt;
+&lt;p&gt;As only a few trials were performed, the replay buffer of size 25000 was never full, so all previous samples were used in each training run.&lt;/p&gt;
+&lt;h3&gt;Results&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="Trial Return" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Trial Return.png"&gt;
+&lt;img alt="Trial Length" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Trial Length.png"&gt;&lt;/p&gt;
+&lt;p&gt;After 10 trials, the robot has successfully learned to drive forward based on the given inputs and reaches its highest return reward of 85.12 in the final trial. This is orders of magnitudes faster than classic methods which can easily take hundreds or thousands of episodes. &lt;/p&gt;
+&lt;p&gt;At this point, the robot has only learned to drive forward as the reward function gives the highest reward for doing so, while a penalty is given if a motor is moving too slow. For this reason, taking a turn is also penalized, and as there is no penalty for ending the trial it has learned to rather drive to the end of the mat than to change course. A differently designed reward function would offset this behavior, for example by not penalizing slow motor activation.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Training Epoch Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Training Epoch Loss.png"&gt;
+&lt;img alt="Validation Epoch Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Validation Epoch Loss.png"&gt;&lt;/p&gt;
+&lt;p&gt;The loss is steadily reduced over all epochs with a slight spike at the 25th epoch.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Training Epoch Nll Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Training Epoch Nll Loss.png"&gt;
+&lt;img alt="Training Epoch Log Std Limit Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Training Epoch Log Std Limit Loss.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Validation Epoch Nll Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Validation Epoch Nll Loss.png"&gt;
+&lt;img alt="Validation Epoch Log Std Limit Loss" src="https://gregorsemmler.github.io/images/sample_efficient_rl/plots/Validation Epoch Log Std Limit Loss.png"&gt;&lt;/p&gt;
+&lt;p&gt;In addition to the previously described negative log likelihood loss, there is an additional loss which allows the ensemble to learn limits to its output standard deviation / variance.&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2" class="simple-footnote" title="See here for how the standard deviation is limited in my implementation."&gt;2&lt;/a&gt;&lt;/sup&gt; This method was also described by the authors of the original PETS paper.
+It is also worthy of note that the nll loss can reach negative values. Once again, we can see a spike in the training nll loss at the 25th epoch up to a value close to 0 and otherwise a continuing decrease.&lt;/p&gt;
+&lt;h3&gt;Videos&lt;/h3&gt;
+&lt;p&gt;Initially the robot drives randomly over the mat:&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.youtube.com/watch?v=5zpn6nwvWA0" title="PETS JetBot initial random behavior"&gt;&lt;img alt="JetBot initial random behavior" src="http://img.youtube.com/vi/5zpn6nwvWA0/0.jpg"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;In less than ten trials it has learned to drive forward on the mat:&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.youtube.com/watch?v=TIJcviz31Kg" title="PETS JetBot on mat trial 10"&gt;&lt;img alt="JetBot on mat trial 10" src="http://img.youtube.com/vi/TIJcviz31Kg/0.jpg"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;We can conclude that the robot has learned to drive forward to maximize rewards. However, it has not yet learned to drive through a curve. One reason for this is, that the reward function is maximized by driving forward, while a curve is punished, as one of the wheels is not driving forward. No reward is lost by driving to the edge ending the trial. 
+Instead, the penalty for driving curves could be removed and a negative reward for the end of the trial added. This would encourage more of a circular motion, while staying on the mat. Alternatives to the CEM optimizer can also be considered for improved results.&lt;/p&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;This concludes my first introduction into sample efficient model-based reinforcement learning by presenting how the PETS algorithm can be used to help a robot to learn to drive by itself in less than 10 trials, based only on raw input images and a reward function in each state. On my GitHub profile I have provided &lt;a href="https://github.com/gregorsemmler/pets/"&gt;my implementation of the algorithm&lt;/a&gt;. &lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] R. S. Sutton and A. G. Barto. &lt;em&gt;Reinforcement learning: An introduction&lt;/em&gt;. MIT Press, 2018.&lt;/p&gt;
+&lt;p&gt;[2] K. Chua, et al. &lt;em&gt;Deep reinforcement learning in a handful of trials using probabilistic dynamics models&lt;/em&gt;. Advances in neural information processing systems, 2018&lt;/p&gt;
+&lt;p&gt;[3] C. Pinneri, et al. &lt;em&gt;Sample-efficient cross-entropy method for real-time planning&lt;/em&gt;. arXiv preprint arXiv:2008.06389, 2020.&lt;/p&gt;
+&lt;h2&gt;Footnotes&lt;/h2&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width &lt; 768) ? "left" : align;
-        indent = (screen.width &lt; 768) ? "0em" : indent;
-        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    mathjaxscript …&lt;/script&gt;&lt;script type='text/javascript'&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
         linebreak = "false";
@@ -74,148 +171,37 @@
     (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</summary><content type="html">&lt;p&gt;Take what is yours.&lt;/p&gt;
-&lt;p&gt;&lt;span class="math"&gt;\(e = \sum\limits_{n = 0}^{\infty} \frac{1}{n!}\)&lt;/span&gt;&lt;/p&gt;
-&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width &lt; 768) ? "left" : align;
-        indent = (screen.width &lt; 768) ? "0em" : indent;
-        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
-
-    var configscript = document.createElement('script');
-    configscript.type = 'text/x-mathjax-config';
-    configscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        availableFonts: ['STIX', 'TeX']," +
-        "        preferredFont: 'STIX'," +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>First Entry</title><link href="https://gregorsemmler.github.io/first-entry.html" rel="alternate"></link><published>2022-08-23T13:38:00+02:00</published><updated>2022-08-23T13:38:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-08-23:/first-entry.html</id><summary type="html">&lt;p&gt;What is this? Hello World.&lt;/p&gt;
-&lt;p&gt;&lt;span class="math"&gt;\(e = mc^2\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;Lorem Ipsum dolor si amet.&lt;/p&gt;
-&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width &lt; 768) ? "left" : align;
-        indent = (screen.width &lt; 768) ? "0em" : indent;
-        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    mathjaxscript …&lt;/script&gt;&lt;script type='text/javascript'&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width &lt; 768) ? "left" : align;
-        indent = (screen.width &lt; 768) ? "0em" : indent;
-        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
-
-    var configscript = document.createElement('script');
-    configscript.type = 'text/x-mathjax-config';
-    configscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        availableFonts: ['STIX', 'TeX']," +
-        "        preferredFont: 'STIX'," +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-&lt;/script&gt;</summary><content type="html">&lt;p&gt;What is this? Hello World.&lt;/p&gt;
-&lt;p&gt;&lt;span class="math"&gt;\(e = mc^2\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;Lorem Ipsum dolor si amet.&lt;/p&gt;
+&lt;/script&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1"&gt;See also &lt;a href="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html"&gt;my introduction to reinforcement learning&lt;/a&gt; &lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2"&gt;See &lt;a href="https://github.com/gregorsemmler/pets/blob/master/model.py#L254-L258"&gt;here&lt;/a&gt; for how the standard deviation is limited in my implementation. &lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-2-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="Entry"></category></entry><entry><title>A brief introduction to Reinforcement Learning</title><link href="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html" rel="alternate"></link><published>2022-08-29T13:38:00+02:00</published><updated>2022-08-29T13:38:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-08-29:/a-brief-introduction-to-reinforcement-learning.html</id><summary type="html">&lt;p&gt;Learning by interacting with our environment is omnipresent in human life. Most of the time we don't have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. &lt;em&gt;Reinforcement Learning&lt;/em&gt; is learning which actions to …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Learning by interacting with our environment is omnipresent in human life. Most of the time we don't have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. &lt;em&gt;Reinforcement Learning&lt;/em&gt; is learning which actions to take in a given situation to maximize a &lt;em&gt;reward&lt;/em&gt; we get from doing so. The agent must explore which actions yield the most reward by trying them out. A learner's action do not only affect the current reward but also the next state and thus all following rewards.&lt;/p&gt;
+&lt;p&gt;Reinforcement learning consists of the central two parts of exploration of actions on the one hand and exploitation of rewards on the other. &lt;em&gt;Supervised learning&lt;/em&gt; on the other hand, the most common form of machine learning nowadays, consists of learning from a given dataset of labeled samples. To give a correct prediction in an interactive problem, the model must be given a representative and correct sample of all situations which might occur over all time steps into the future. It is most often infeasible to achieve this through pure supervised learning.&lt;/p&gt;
+&lt;h2&gt;Components of Reinforcement Learning&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;em&gt;policy&lt;/em&gt; defines which action should be taken by the agent in a given state. A policy can be deterministic (same output everytime) or stochastic (output is sampled from a probability distribution)&lt;/li&gt;
+&lt;li&gt;At each time step, the agent receives a one-dimensional numerical &lt;em&gt;reward&lt;/em&gt;. Maximizing the total reward an agent gains is the main target of reinforcement learning. It is the primary way of changing the policy.&lt;/li&gt;
+&lt;li&gt;A &lt;em&gt;value function&lt;/em&gt; predicts the total long-term reward one can expect to gain, starting from a given state. &lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Finite Markov Decision Processes&lt;/h2&gt;
+&lt;p&gt;Markov decision processes define a framework for sequential decision-making which is used for reinforcement learning. In each state an action can be taken will yield a reward and lead to a new state which will then indirectly influence possible future rewards. &lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;agent&lt;/em&gt; is the learner and decision maker and interacts with the &lt;em&gt;environment&lt;/em&gt;, which consists of everything outside the agent. The agent keeps selecting actions and the environment keeps responding with a new state and a reward.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Agent-Environment Interface" src="https://gregorsemmler.github.io/images/agent_environment_interaction.png"&gt; (Figure 3.1 from [1])&lt;/p&gt;
+&lt;p&gt;At each time step &lt;span class="math"&gt;\(t = 0, 1, 2, ...\)&lt;/span&gt; the agent receives a state &lt;span class="math"&gt;\(S_t \in \mathcal{S}\)&lt;/span&gt;, selects an action &lt;span class="math"&gt;\(A_t \in \mathcal{A}(s)\)&lt;/span&gt; and receives a numerical reward &lt;span class="math"&gt;\(R_{t+1} \in \mathcal{R} \subset \mathbb{R}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In a finite MDP, the sets &lt;span class="math"&gt;\(\mathcal{S}\)&lt;/span&gt;, &lt;span class="math"&gt;\(\mathcal{A}\)&lt;/span&gt;, and &lt;span class="math"&gt;\(\mathcal{R}\)&lt;/span&gt; all have a finite number of elements.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;dynamics&lt;/em&gt; of the MDP is the probability of ending up in a new state &lt;span class="math"&gt;\(s'\)&lt;/span&gt; and receiving a reward &lt;span class="math"&gt;\(r\)&lt;/span&gt; given a state &lt;span class="math"&gt;\(s\)&lt;/span&gt; and action &lt;span class="math"&gt;\(a\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(p(s', r | s, a) \doteq Pr\{S_t = s', R_t = r | S_{t-1}=s, A_{t-1}=a\}\)&lt;/span&gt; &lt;/p&gt;
+&lt;p&gt;In applications where one can define a final time step, each such subsequence of time steps is called an &lt;em&gt;episode&lt;/em&gt;. Each episode ends in a so-called &lt;em&gt;terminal state&lt;/em&gt;, after which a reset of the environment leads to a new start state.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;return&lt;/em&gt; is the discounted sum of rewards over time:&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + ... = \sum_{k=0}^{T} \gamma^k R_{t+k+1}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;where &lt;span class="math"&gt;\(\gamma\)&lt;/span&gt; with &lt;span class="math"&gt;\(0 \leq \gamma \leq 1\)&lt;/span&gt; is the &lt;em&gt;discount rate&lt;/em&gt;, describing the fact that immediate rewards are considered more valuable than those further in the future. Here &lt;span class="math"&gt;\(T\)&lt;/span&gt; describe the final time step. For &lt;em&gt;unepisodic&lt;/em&gt; cases, it would be replaced with &lt;span class="math"&gt;\(\infty\)&lt;/span&gt;. The general goal is to find the actions which result in the highest return.&lt;/p&gt;
+&lt;h2&gt;Policies and Value Functions&lt;/h2&gt;
+&lt;p&gt;A &lt;em&gt;policy&lt;/em&gt; &lt;span class="math"&gt;\(\pi(a|s)\)&lt;/span&gt; is the probability of selecting an action &lt;span class="math"&gt;\(A_t = a\)&lt;/span&gt; if &lt;span class="math"&gt;\(S_t = s\)&lt;/span&gt;. It can be set as a rule set an agent follows.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;state-value function&lt;/em&gt; &lt;span class="math"&gt;\(v_\pi(s)\)&lt;/span&gt; of a state &lt;span class="math"&gt;\(s\)&lt;/span&gt; for a policy &lt;span class="math"&gt;\(\pi\)&lt;/span&gt; is the expected return when starting in &lt;span class="math"&gt;\(s\)&lt;/span&gt; and following &lt;span class="math"&gt;\(\pi\)&lt;/span&gt; thereafter.&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(v_\pi(s) \doteq \mathbb{E}_\pi\left[G_t | S_t = s\right] = \mathbb{E}_\pi\left[\sum_{k=0}^\infty\gamma^k R_{t+k+1}| S_t = s\right]\)&lt;/span&gt; 
+for all &lt;span class="math"&gt;\(s \in \mathcal{S}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;action-value function&lt;/em&gt; &lt;span class="math"&gt;\(q_\pi(s, a)\)&lt;/span&gt; is the expected return starting from state &lt;span class="math"&gt;\(s\)&lt;/span&gt;, taking action &lt;span class="math"&gt;\(a\)&lt;/span&gt; and thereafter following the policy &lt;span class="math"&gt;\(\pi\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(q_\pi(s, a) \doteq \mathbb{E}_\pi\left[G_t | S_t = s, A_t = a\right] = \mathbb{E}_\pi\left[\sum_{k=0}^{\infty}{\gamma^k R_{t+k+1}}|S_t=s, A_t=a\right]\)&lt;/span&gt;&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;There are various methods which try to improve an approximation to the value function or the action-value function to then decide which are the optimal actions to take. Other approaches directly learn an approximation of the policy. These topics will be covered in more detail in the future. This concludes the first part of my Introduction to Reinforcement Learning.&lt;/p&gt;
+&lt;h3&gt;References&lt;/h3&gt;
+&lt;p&gt;[1] R. S. Sutton and A. G. Barto. &lt;em&gt;Reinforcement learning: An introduction&lt;/em&gt;. MIT Press, 2018&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",

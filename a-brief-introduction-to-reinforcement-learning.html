@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Gregor Semmler" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content=", Entry, " />
+
+<meta property="og:title" content="A brief introduction to Reinforcement Learning "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html" />
+<meta property="og:description" content="Learning by interacting with our environment is omnipresent in human life. Most of the time we don&#39;t have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. Reinforcement Learning is learning which actions to …" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Website" />
+<meta property="og:article:author" content="Gregor Semmler" />
+<meta property="og:article:published_time" content="2022-08-29T13:38:00+02:00" />
+<meta name="twitter:title" content="A brief introduction to Reinforcement Learning ">
+<meta name="twitter:description" content="Learning by interacting with our environment is omnipresent in human life. Most of the time we don&#39;t have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. Reinforcement Learning is learning which actions to …">
+
+        <title>A brief introduction to Reinforcement Learning  · Gregor Semmler&#39;s Website
+</title>
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Website - Full Atom Feed" />
+
+
+
+        <link rel="stylesheet" href="https://files.stork-search.net/basic.css" />
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Website</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://gregorsemmler.github.io
+                                    >Home</a>
+                                </li>
+                                <!-- <li ><a href="https://gregorsemmler.github.io/categories">Categories</a></li> -->
+                                <!-- <li ><a href="https://gregorsemmler.github.io/tags">Tags</a></li> -->
+                                <li ><a href="https://gregorsemmler.github.io/archives">Archives</a></li>
+                                <!-- <li><form class="navbar-search" action="https://gregorsemmler.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li> -->
+                                <input class="navbar-search search-query" data-stork="sitesearch" type="text" placeholder="Search"/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div data-stork="sitesearch-output"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<main>
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html">
+                A brief introduction to Reinforcement Learning
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Learning by interacting with our environment is omnipresent in human life. Most of the time we don't have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. <em>Reinforcement Learning</em> is learning which actions to take in a given situation to maximize a <em>reward</em> we get from doing so. The agent must explore which actions yield the most reward by trying them out. A learner's action do not only affect the current reward but also the next state and thus all following rewards.</p>
+<p>Reinforcement learning consists of the central two parts of exploration of actions on the one hand and exploitation of rewards on the other. <em>Supervised learning</em> on the other hand, the most common form of machine learning nowadays, consists of learning from a given dataset of labeled samples. To give a correct prediction in an interactive problem, the model must be given a representative and correct sample of all situations which might occur over all time steps into the future. It is most often infeasible to achieve this through pure supervised learning.</p>
+<h2>Components of Reinforcement Learning</h2>
+<ul>
+<li>A <em>policy</em> defines which action should be taken by the agent in a given state. A policy can be deterministic (same output everytime) or stochastic (output is sampled from a probability distribution)</li>
+<li>At each time step, the agent receives a one-dimensional numerical <em>reward</em>. Maximizing the total reward an agent gains is the main target of reinforcement learning. It is the primary way of changing the policy.</li>
+<li>A <em>value function</em> predicts the total long-term reward one can expect to gain, starting from a given state. </li>
+</ul>
+<h2>Finite Markov Decision Processes</h2>
+<p>Markov decision processes define a framework for sequential decision-making which is used for reinforcement learning. In each state an action can be taken will yield a reward and lead to a new state which will then indirectly influence possible future rewards. </p>
+<p>The <em>agent</em> is the learner and decision maker and interacts with the <em>environment</em>, which consists of everything outside the agent. The agent keeps selecting actions and the environment keeps responding with a new state and a reward.</p>
+<p><img alt="Agent-Environment Interface" src="https://gregorsemmler.github.io/images/agent_environment_interaction.png"> (Figure 3.1 from [1])</p>
+<p>At each time step <span class="math">\(t = 0, 1, 2, ...\)</span> the agent receives a state <span class="math">\(S_t \in \mathcal{S}\)</span>, selects an action <span class="math">\(A_t \in \mathcal{A}(s)\)</span> and receives a numerical reward <span class="math">\(R_{t+1} \in \mathcal{R} \subset \mathbb{R}\)</span></p>
+<p>In a finite MDP, the sets <span class="math">\(\mathcal{S}\)</span>, <span class="math">\(\mathcal{A}\)</span>, and <span class="math">\(\mathcal{R}\)</span> all have a finite number of elements.</p>
+<p>The <em>dynamics</em> of the MDP is the probability of ending up in a new state <span class="math">\(s'\)</span> and receiving a reward <span class="math">\(r\)</span> given a state <span class="math">\(s\)</span> and action <span class="math">\(a\)</span>:</p>
+<p><span class="math">\(p(s', r | s, a) \doteq Pr\{S_t = s', R_t = r | S_{t-1}=s, A_{t-1}=a\}\)</span> </p>
+<p>In applications where one can define a final time step, each such subsequence of time steps is called an <em>episode</em>. Each episode ends in a so-called <em>terminal state</em>, after which a reset of the environment leads to a new start state.</p>
+<p>The <em>return</em> is the discounted sum of rewards over time:</p>
+<p><span class="math">\(G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + ... = \sum_{k=0}^{T} \gamma^k R_{t+k+1}\)</span></p>
+<p>where <span class="math">\(\gamma\)</span> with <span class="math">\(0 \leq \gamma \leq 1\)</span> is the <em>discount rate</em>, describing the fact that immediate rewards are considered more valuable than those further in the future. Here <span class="math">\(T\)</span> describe the final time step. For <em>unepisodic</em> cases, it would be replaced with <span class="math">\(\infty\)</span>. The general goal is to find the actions which result in the highest return.</p>
+<h2>Policies and Value Functions</h2>
+<p>A <em>policy</em> <span class="math">\(\pi(a|s)\)</span> is the probability of selecting an action <span class="math">\(A_t = a\)</span> if <span class="math">\(S_t = s\)</span>. It can be set as a rule set an agent follows.</p>
+<p>The <em>state-value function</em> <span class="math">\(v_\pi(s)\)</span> of a state <span class="math">\(s\)</span> for a policy <span class="math">\(\pi\)</span> is the expected return when starting in <span class="math">\(s\)</span> and following <span class="math">\(\pi\)</span> thereafter.</p>
+<p><span class="math">\(v_\pi(s) \doteq \mathbb{E}_\pi\left[G_t | S_t = s\right] = \mathbb{E}_\pi\left[\sum_{k=0}^\infty\gamma^k R_{t+k+1}| S_t = s\right]\)</span> 
+for all <span class="math">\(s \in \mathcal{S}\)</span>.</p>
+<p>The <em>action-value function</em> <span class="math">\(q_\pi(s, a)\)</span> is the expected return starting from state <span class="math">\(s\)</span>, taking action <span class="math">\(a\)</span> and thereafter following the policy <span class="math">\(\pi\)</span>:</p>
+<p><span class="math">\(q_\pi(s, a) \doteq \mathbb{E}_\pi\left[G_t | S_t = s, A_t = a\right] = \mathbb{E}_\pi\left[\sum_{k=0}^{\infty}{\gamma^k R_{t+k+1}}|S_t=s, A_t=a\right]\)</span></p>
+<h2>Conclusion</h2>
+<p>There are various methods which try to improve an approximation to the value function or the action-value function to then decide which are the optimal actions to take. Other approaches directly learn an approximation of the policy. These topics will be covered in more detail in the future. This concludes the first part of my Introduction to Reinforcement Learning.</p>
+<h3>References</h3>
+<p>[1] R. S. Sutton and A. G. Barto. <em>Reinforcement learning: An introduction</em>. MIT Press, 2018</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2022-08-29T13:38:00+02:00">Mo 29 August 2022</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+</main>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://gregorsemmler.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        <script src="https://files.stork-search.net/releases/v1.5.0/stork.js"></script>
+        <script>
+            stork.register("sitesearch", "https://gregorsemmler.github.io/search-index.st")
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
