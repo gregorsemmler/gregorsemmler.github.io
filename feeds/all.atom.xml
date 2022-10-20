@@ -1,5 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gregor Semmler's Website</title><link href="https://gregorsemmler.github.io/" rel="alternate"></link><link href="https://gregorsemmler.github.io/feeds/all.atom.xml" rel="self"></link><id>https://gregorsemmler.github.io/</id><updated>2022-09-13T18:27:00+02:00</updated><entry><title>How a robot can learn to drive in less than ten trials</title><link href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html" rel="alternate"></link><published>2022-09-13T18:27:00+02:00</published><updated>2022-09-13T18:27:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-09-13:/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html</id><summary type="html">&lt;p&gt;Although reinforcement learning&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning"&gt;1&lt;/a&gt;&lt;/sup&gt; has achievement remarkable, superhuman results in various applications like &lt;a href="https://www.youtube.com/watch?v=WXuK6gekU1Y"&gt;AlphaGo&lt;/a&gt; these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Although reinforcement learning&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning"&gt;1&lt;/a&gt;&lt;/sup&gt; has achievement remarkable, superhuman results in various applications like &lt;a href="https://www.youtube.com/watch?v=WXuK6gekU1Y"&gt;AlphaGo&lt;/a&gt; these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources. However, it is generally more difficult to make an approach work in a real-world application.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gregor Semmler's Website</title><link href="https://gregorsemmler.github.io/" rel="alternate"></link><link href="https://gregorsemmler.github.io/feeds/all.atom.xml" rel="self"></link><id>https://gregorsemmler.github.io/</id><updated>2022-10-20T16:18:00+02:00</updated><entry><title>Learning to pay attention</title><link href="https://gregorsemmler.github.io/learning-to-pay-attention.html" rel="alternate"></link><published>2022-10-20T16:18:00+02:00</published><updated>2022-10-20T16:18:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-10-20:/learning-to-pay-attention.html</id><summary type="html">&lt;p&gt;For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …&lt;/p&gt;</summary><content type="html">&lt;p&gt;For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks have achieved remarkable results in various applications in recent years. However, for a human observer it is mostly incomprehensible how the neural network has come to its conclusion, therefore not allowing deeper analysis of both correct and incorrect outputs. If we could teach a machine learning model to learn to pay attention to specific parts of an input image it would allow us to interpret which parts are deemed most important, leading to a more interpretable and explainable process.&lt;/p&gt;
+&lt;h2&gt;Attention&lt;/h2&gt;
+&lt;p&gt;For this, we can use scalar matrices which show the relative importance of specific parts of the image for the given task, so-called attention maps. For image classification, for example, the attention can determine the location of the object of interest. There are a different ways to implement attention, either as a trainable mechanism or as an analysis after the fact. &lt;/p&gt;
+&lt;p&gt;In this case we will look at a method by Jetley et al. [1] which includes attention estimators integrated into different points of the CNN architecture.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Attention mechanism" src="https://gregorsemmler.github.io/images/attention/attention_mechanism.png"&gt; (Image from [1])&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;local features&lt;/em&gt; refer to the outputs from a convolutional layer within the network, while the &lt;em&gt;global features&lt;/em&gt; refer to the outputs of the last layer before the final classification layer. The local features therefore have a receptive field for some local part of the image while the global features have the complete image has a receptive field. Each attention estimator has as input both local and global features.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="VGG attention example" src="https://gregorsemmler.github.io/images/attention/vgg_example.png"&gt; (Image from [1])&lt;/p&gt;
+&lt;p&gt;In a CNN the convolutional layers closer to the input will learn to extract abstract features like edges while later layers will capture increasingly complicated shapes. By positioning attention maps at different points in the network structure we can capture the spatial location of important parts of the image at different levels of abstraction.&lt;/p&gt;
+&lt;p&gt;The idea is to find relevant areas in the image and increasing their importance while decreasing the influence of insignificant ones. Through the restriction of the attention modules the network has to learn a compatibility between the local feature vectors from the middle parts of the network and the global feature vector. It has to use a combination of the local and global features based on learned compatibility scores.&lt;/p&gt;
+&lt;p&gt;Here we will use a compatibility score function &lt;span class="math"&gt;\(\mathcal{C}\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\(c_i^s = \left\langle u, l_i^s + g \right\rangle,\: i \in \{1, ..., n \}\)&lt;/span&gt; &lt;/p&gt;
+&lt;p&gt;where &lt;span class="math"&gt;\(\langle\cdot\rangle\)&lt;/span&gt; is the dot product between the two vectors. Instead of concatenating the &lt;span class="math"&gt;\(l_i^s\)&lt;/span&gt; and &lt;span class="math"&gt;\(g\)&lt;/span&gt;, addition is used, to simplify the process [1].&lt;/p&gt;
+&lt;p&gt;In a usual CNN the global image descriptor &lt;span class="math"&gt;\(g\)&lt;/span&gt; is derived from the input image and passed through a final fully connected layer (used for classification for example). The network must learn to map the input into a higher dimensional space (via the CNN) layers, before then getting back to the final output. In this method, the layers are encouraged to learn similar mappings between the local descriptors &lt;span class="math"&gt;\(l_i\)&lt;/span&gt; and the global descriptor &lt;span class="math"&gt;\(g\)&lt;/span&gt; at multiple stages in the CNN pipeline. A local descriptor is only able to contribute to the final step in proportion to the compatibility with the global descriptor &lt;span class="math"&gt;\(g\)&lt;/span&gt;. This means that only parts of the image important for the global task should result in a high compatibility score.&lt;/p&gt;
+&lt;h2&gt;SqueezeNet&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html"&gt;In a previous article&lt;/a&gt; I have discussed how a robot can learn to drive in less than ten trials. There are different neural networks used in this application.&lt;/p&gt;
+&lt;p&gt;The first one is a classification network which detects whether the robot is on the mat and thus if the episode is over. Because we want to save resources on our JetBot we want to consider small and efficient models.&lt;/p&gt;
+&lt;p&gt;One famous mobile model is SqueezeNet [2], a model which manages to reach the accuracy of AlexNet [3] on the ImageNet image dataset with a size of only about 0.5 MiB. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="Fire module" src="https://gregorsemmler.github.io/images/attention/fire_module.png"&gt; (image from [2])&lt;/p&gt;
+&lt;p&gt;The central part of the model architecture is the fire module which consists of a &lt;em&gt;squeeze&lt;/em&gt; and an &lt;em&gt;expand&lt;/em&gt; step. The &lt;em&gt;squeeze&lt;/em&gt; convolution layer only has 1x1 filters after which the ReLU activation is used and the values are expanded back with 1x1 and 3x3 convolutional filters, followed by a final ReLU activation. The usage of this module helps keep the model size down while keeping high performance.&lt;/p&gt;
+&lt;h3&gt;Augmenting the model architecture&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="SqueezeNet architecture with and without Attention" src="https://gregorsemmler.github.io/images/attention/squeezenet_with_and_without_attention.svg"&gt;&lt;/p&gt;
+&lt;p&gt;Similar to the VGG example above, we can extend the SqueezeNet architecture (left) by adding multiple attention modules to it (right). &lt;/p&gt;
+&lt;p&gt;The architecture consists of one initial and one final convolutional layer, intermediate max pool operations and otherwise of fire modules which allow to capture increasingly more complex shapes while keeping the model size down. We add the attention modules after the first convolutional layer, and the second and fourth fire module, before the following max pool layers. The global output (out of the adaptive average pool layer &lt;em&gt;a_avg_pool&lt;/em&gt;) and the outputs of the attention modules are concatenated together and are input into the final linear layer.&lt;/p&gt;
+&lt;h3&gt;Visualization&lt;/h3&gt;
+&lt;p&gt;We can visualize the three attention maps (left to right corresponding to the first, second and last) produced for an image via a heatmap. Blue colors indicate less attention and red colors more. The compatibility scores sum up to 1 over all pixels. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/1.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/2.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/3.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/4.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/5.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/11.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/12.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/13.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/14.jpg"&gt;
+&lt;img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/15.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;For the classification network which detects whether the robot is on the mat, we can see that the middle and especially the right attention module put more emphasis attention to the edges of the mat and try to find other edges in the case where the mat is not visible. For the attention map closest to the input on the left we can see that broader areas on the ground receive the most attention.&lt;/p&gt;
+&lt;p&gt;The next network to be considered is the encoder part of the autoencoder used to compress the input images down to the latent dimension. Again, we can use the attention squeezenet network.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/1.jpg"&gt;
+&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/11.jpg"&gt;
+&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/2.jpg"&gt;
+&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/3.jpg"&gt;
+&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/4.jpg"&gt;
+&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/5.jpg"&gt;
+&lt;img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/15.jpg"&gt;&lt;/p&gt;
+&lt;p&gt;Interestingly we can see that in general, for all attention maps, the network gives about the same amount of attention to all areas of the input image. Intuitively, we can say that the autoencoder needs to do that to be able to reconstruct the original image as well as possible via the decoder.&lt;/p&gt;
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;In this article we examined a way to visualize what a convolutional neural network pays attention to enable a more explainable approach for a human and less of a black box model. This allows examining what a model uses in both correct and incorrect predictions. We can also determine that for different tasks, the model learns to pay attention to different parts of the image. For classification, the model pays attention to the edges of the mat, because that is most important to detect if the robot is driving off the mat. For the encoding model, all parts of the image are paid attention to equally, as they need to be reconstructed as accurately as possible by the decoder. If further constraints are put into the encoding process, we can expect the attention to reflect that, accordingly.&lt;/p&gt;
+&lt;h3&gt;References&lt;/h3&gt;
+&lt;p&gt;[1] S. Jetley, et al. &lt;em&gt;Learn to pay attention&lt;/em&gt;. arXiv preprint arXiv:1804.02391, 2018.&lt;/p&gt;
+&lt;p&gt;[2] F. N. Iandola, et. al. &lt;em&gt;SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and &lt;span class="math"&gt;\(&amp;lt;\)&lt;/span&gt;0.5MB model size&lt;/em&gt;. arXiv preprint arXiv:1602.07360, 2016.&lt;/p&gt;
+&lt;p&gt;[3] A. Krizhevsky, I. Sutskever, and G. E. Hinton. &lt;em&gt;Imagenet classification with deep convolutional neural networks&lt;/em&gt;. Communications of the ACM, 2017, 60.6, 84-90.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>How a robot can learn to drive in less than ten trials</title><link href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html" rel="alternate"></link><published>2022-09-13T18:27:00+02:00</published><updated>2022-09-13T18:27:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-09-13:/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html</id><summary type="html">&lt;p&gt;Although reinforcement learning&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning"&gt;1&lt;/a&gt;&lt;/sup&gt; has achievement remarkable, superhuman results in various applications like &lt;a href="https://www.youtube.com/watch?v=WXuK6gekU1Y"&gt;AlphaGo&lt;/a&gt; these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Although reinforcement learning&lt;sup id="sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1-back"&gt;&lt;a href="#sf-how-a-robot-can-learn-to-drive-in-less-than-ten-trials-1" class="simple-footnote" title="See also my introduction to reinforcement learning"&gt;1&lt;/a&gt;&lt;/sup&gt; has achievement remarkable, superhuman results in various applications like &lt;a href="https://www.youtube.com/watch?v=WXuK6gekU1Y"&gt;AlphaGo&lt;/a&gt; these applications have always been in simulated environments where one training run can be done and restarted quickly, and safely. In fact, these training runs can also be massively parallelized depending on the available computing resources. However, it is generally more difficult to make an approach work in a real-world application.&lt;/p&gt;
 &lt;p&gt;In those cases there are two main approaches:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Simulate the environment as closely as possible, solve the problem in the simulation, then apply this solution to the real situation.&lt;/li&gt;

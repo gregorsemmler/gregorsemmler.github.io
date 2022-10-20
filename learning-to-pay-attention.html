@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Gregor Semmler" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content=", Entry, " />
+
+<meta property="og:title" content="Learning to pay attention "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/learning-to-pay-attention.html" />
+<meta property="og:description" content="For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Website" />
+<meta property="og:article:author" content="Gregor Semmler" />
+<meta property="og:article:published_time" content="2022-10-20T16:18:00+02:00" />
+<meta name="twitter:title" content="Learning to pay attention ">
+<meta name="twitter:description" content="For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …">
+
+        <title>Learning to pay attention  · Gregor Semmler&#39;s Website
+</title>
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Website - Full Atom Feed" />
+
+
+
+        <link rel="stylesheet" href="https://files.stork-search.net/basic.css" />
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Website</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://gregorsemmler.github.io
+                                    >Home</a>
+                                </li>
+                                <!-- <li ><a href="https://gregorsemmler.github.io/categories">Categories</a></li> -->
+                                <!-- <li ><a href="https://gregorsemmler.github.io/tags">Tags</a></li> -->
+                                <li ><a href="https://gregorsemmler.github.io/archives">Archives</a></li>
+                                <!-- <li><form class="navbar-search" action="https://gregorsemmler.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li> -->
+                                <input class="navbar-search search-query" data-stork="sitesearch" type="text" placeholder="Search"/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div data-stork="sitesearch-output"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<main>
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://gregorsemmler.github.io/learning-to-pay-attention.html">
+                Learning to pay attention
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks have achieved remarkable results in various applications in recent years. However, for a human observer it is mostly incomprehensible how the neural network has come to its conclusion, therefore not allowing deeper analysis of both correct and incorrect outputs. If we could teach a machine learning model to learn to pay attention to specific parts of an input image it would allow us to interpret which parts are deemed most important, leading to a more interpretable and explainable process.</p>
+<h2>Attention</h2>
+<p>For this, we can use scalar matrices which show the relative importance of specific parts of the image for the given task, so-called attention maps. For image classification, for example, the attention can determine the location of the object of interest. There are a different ways to implement attention, either as a trainable mechanism or as an analysis after the fact. </p>
+<p>In this case we will look at a method by Jetley et al. [1] which includes attention estimators integrated into different points of the CNN architecture.</p>
+<p><img alt="Attention mechanism" src="https://gregorsemmler.github.io/images/attention/attention_mechanism.png"> (Image from [1])</p>
+<p>The <em>local features</em> refer to the outputs from a convolutional layer within the network, while the <em>global features</em> refer to the outputs of the last layer before the final classification layer. The local features therefore have a receptive field for some local part of the image while the global features have the complete image has a receptive field. Each attention estimator has as input both local and global features.</p>
+<p><img alt="VGG attention example" src="https://gregorsemmler.github.io/images/attention/vgg_example.png"> (Image from [1])</p>
+<p>In a CNN the convolutional layers closer to the input will learn to extract abstract features like edges while later layers will capture increasingly complicated shapes. By positioning attention maps at different points in the network structure we can capture the spatial location of important parts of the image at different levels of abstraction.</p>
+<p>The idea is to find relevant areas in the image and increasing their importance while decreasing the influence of insignificant ones. Through the restriction of the attention modules the network has to learn a compatibility between the local feature vectors from the middle parts of the network and the global feature vector. It has to use a combination of the local and global features based on learned compatibility scores.</p>
+<p>Here we will use a compatibility score function <span class="math">\(\mathcal{C}\)</span></p>
+<p><span class="math">\(c_i^s = \left\langle u, l_i^s + g \right\rangle,\: i \in \{1, ..., n \}\)</span> </p>
+<p>where <span class="math">\(\langle\cdot\rangle\)</span> is the dot product between the two vectors. Instead of concatenating the <span class="math">\(l_i^s\)</span> and <span class="math">\(g\)</span>, addition is used, to simplify the process [1].</p>
+<p>In a usual CNN the global image descriptor <span class="math">\(g\)</span> is derived from the input image and passed through a final fully connected layer (used for classification for example). The network must learn to map the input into a higher dimensional space (via the CNN) layers, before then getting back to the final output. In this method, the layers are encouraged to learn similar mappings between the local descriptors <span class="math">\(l_i\)</span> and the global descriptor <span class="math">\(g\)</span> at multiple stages in the CNN pipeline. A local descriptor is only able to contribute to the final step in proportion to the compatibility with the global descriptor <span class="math">\(g\)</span>. This means that only parts of the image important for the global task should result in a high compatibility score.</p>
+<h2>SqueezeNet</h2>
+<p><a href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html">In a previous article</a> I have discussed how a robot can learn to drive in less than ten trials. There are different neural networks used in this application.</p>
+<p>The first one is a classification network which detects whether the robot is on the mat and thus if the episode is over. Because we want to save resources on our JetBot we want to consider small and efficient models.</p>
+<p>One famous mobile model is SqueezeNet [2], a model which manages to reach the accuracy of AlexNet [3] on the ImageNet image dataset with a size of only about 0.5 MiB. </p>
+<p><img alt="Fire module" src="https://gregorsemmler.github.io/images/attention/fire_module.png"> (image from [2])</p>
+<p>The central part of the model architecture is the fire module which consists of a <em>squeeze</em> and an <em>expand</em> step. The <em>squeeze</em> convolution layer only has 1x1 filters after which the ReLU activation is used and the values are expanded back with 1x1 and 3x3 convolutional filters, followed by a final ReLU activation. The usage of this module helps keep the model size down while keeping high performance.</p>
+<h3>Augmenting the model architecture</h3>
+<p><img alt="SqueezeNet architecture with and without Attention" src="https://gregorsemmler.github.io/images/attention/squeezenet_with_and_without_attention.svg"></p>
+<p>Similar to the VGG example above, we can extend the SqueezeNet architecture (left) by adding multiple attention modules to it (right). </p>
+<p>The architecture consists of one initial and one final convolutional layer, intermediate max pool operations and otherwise of fire modules which allow to capture increasingly more complex shapes while keeping the model size down. We add the attention modules after the first convolutional layer, and the second and fourth fire module, before the following max pool layers. The global output (out of the adaptive average pool layer <em>a_avg_pool</em>) and the outputs of the attention modules are concatenated together and are input into the final linear layer.</p>
+<h3>Visualization</h3>
+<p>We can visualize the three attention maps (left to right corresponding to the first, second and last) produced for an image via a heatmap. Blue colors indicate less attention and red colors more. The compatibility scores sum up to 1 over all pixels. </p>
+<p><img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/1.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/2.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/3.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/4.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/5.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/11.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/12.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/13.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/14.jpg">
+<img alt="Done network attention example" src="https://gregorsemmler.github.io/images/attention/done_network/15.jpg"></p>
+<p>For the classification network which detects whether the robot is on the mat, we can see that the middle and especially the right attention module put more emphasis attention to the edges of the mat and try to find other edges in the case where the mat is not visible. For the attention map closest to the input on the left we can see that broader areas on the ground receive the most attention.</p>
+<p>The next network to be considered is the encoder part of the autoencoder used to compress the input images down to the latent dimension. Again, we can use the attention squeezenet network.</p>
+<p><img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/1.jpg">
+<img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/11.jpg">
+<img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/2.jpg">
+<img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/3.jpg">
+<img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/4.jpg">
+<img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/5.jpg">
+<img alt="Encoder network attention example" src="https://gregorsemmler.github.io/images/attention/encoder/15.jpg"></p>
+<p>Interestingly we can see that in general, for all attention maps, the network gives about the same amount of attention to all areas of the input image. Intuitively, we can say that the autoencoder needs to do that to be able to reconstruct the original image as well as possible via the decoder.</p>
+<h3>Conclusion</h3>
+<p>In this article we examined a way to visualize what a convolutional neural network pays attention to enable a more explainable approach for a human and less of a black box model. This allows examining what a model uses in both correct and incorrect predictions. We can also determine that for different tasks, the model learns to pay attention to different parts of the image. For classification, the model pays attention to the edges of the mat, because that is most important to detect if the robot is driving off the mat. For the encoding model, all parts of the image are paid attention to equally, as they need to be reconstructed as accurately as possible by the decoder. If further constraints are put into the encoding process, we can expect the attention to reflect that, accordingly.</p>
+<h3>References</h3>
+<p>[1] S. Jetley, et al. <em>Learn to pay attention</em>. arXiv preprint arXiv:1804.02391, 2018.</p>
+<p>[2] F. N. Iandola, et. al. <em>SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <span class="math">\(&lt;\)</span>0.5MB model size</em>. arXiv preprint arXiv:1602.07360, 2016.</p>
+<p>[3] A. Krizhevsky, I. Sutskever, and G. E. Hinton. <em>Imagenet classification with deep convolutional neural networks</em>. Communications of the ACM, 2017, 60.6, 84-90.</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+<section>
+    <h6 style="display:none;">Comments</h6>
+    <p id="comment-message"> </p>
+
+    <div class="accordion" id="accordion2">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
+                   data-toggle="collapse"
+                   data-parent="#accordion2"
+                   data-disqus-identifier="https://gregorsemmler.github.io/learning-to-pay-attention.html"
+                   href="https://gregorsemmler.github.io/learning-to-pay-attention.html#comment_thread"
+                   id="comment-accordion-toggle">
+                    Comments
+                </a>
+            </div>
+            <div id="comment_thread" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <div class="comments">
+                        <div id="disqus_thread"></div>
+                        <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = 'https://gregorsemmler.github.io/learning-to-pay-attention.html';
+    this.page.identifier = 'https://gregorsemmler.github.io/learning-to-pay-attention.html';
+    };
+     */
+    var disqus_identifier = 'https://gregorsemmler.github.io/learning-to-pay-attention.html';
+    var disqus_url = 'https://gregorsemmler.github.io/learning-to-pay-attention.html';
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://gregor-s.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2022-10-20T16:18:00+02:00">Do 20 Oktober 2022</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+</main>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://gregorsemmler.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        <script src="https://files.stork-search.net/releases/v1.5.0/stork.js"></script>
+        <script>
+            stork.register("sitesearch", "https://gregorsemmler.github.io/search-index.st")
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

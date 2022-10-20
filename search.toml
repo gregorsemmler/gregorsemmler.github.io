@@ -3,6 +3,11 @@ base_directory = "output"
 html_selector = "main"
 
 [[input.files]]
+path = "learning-to-pay-attention.html"
+url = "/learning-to-pay-attention.html"
+title = "Learning to pay attention"
+
+[[input.files]]
 path = "how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html"
 url = "/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html"
 title = "How a robot can learn to drive in less than ten trials"
