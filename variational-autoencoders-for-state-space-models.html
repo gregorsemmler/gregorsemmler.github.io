@@ -20,7 +20,7 @@
 <meta property="og:title" content="Variational Autoencoders for State Space Models "/>
 <meta property="og:url" content="https://gregorsemmler.github.io/variational-autoencoders-for-state-space-models.html" />
 <meta property="og:description" content="Introduction In the last article we have introduced state space models and how to extend the concept of the variational auto-encoder to them and how to train them. We will now look at several examples of VAEs for SSMs in more detail. Deep Kalman Filter The Deep Kalman Filter [1 …" />
-<meta property="og:site_name" content="Gregor Semmler&#39;s Blog" />
+<meta property="og:site_name" content="Gregor Semmler&/Thi#39;s Blog" />
 <meta property="og:article:author" content="Gregor Semmler" />
 <meta property="og:article:published_time" content="2023-04-07T08:23:00+02:00" />
 <meta name="twitter:title" content="Variational Autoencoders for State Space Models ">
@@ -147,7 +147,7 @@ where <span class="math">\(\delta \big(h_t; x \big)\)</span> is the dirac delta 
 </p>
 <div class="math">$$= \prod_{t=1}^T p_\theta\big({\bf o}_t \mid {\bf o}_{1:t-1}, {\bf s}_{1:t-1}, {\bf a}_{1:t}\big) p_\theta\big({\bf s}_t \mid {\bf s}_{1:t-1}, {\bf o}_{1:t-1},  {\bf a}_{1:t}\big) p_\theta\big({\bf a}_t\big)$$</div>
 <p>
-This we can draw an equivalent graphical model without the deterministic nodes <span class="math">\(h_t\)</span></p>
+This means we can draw an equivalent graphical model without the deterministic nodes <span class="math">\(h_t\)</span></p>
 <p><img alt="vrnn-graphical-model-v2-no-h" src="https://gregorsemmler.github.io/images/model_learning/vrnn-graphical-model-v2-no-h.png"></p>
 <p>Based on this simplified graph, we can retrieve the inference model</p>
 <div class="math">$$p_{\theta}\left({\bf s}_{1:T}\mid\mathbf{o}_{1:T},\mathbf{a}_{1:T}\right) = \prod_{t=1}^T p_\theta\big({\bf s}_t \mid {\bf s}_{1:t-1}, {\bf o}_{1:T},  {\bf a}_{1:t}\big) $$</div>
