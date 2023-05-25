@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Gregor Semmler" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content=", Entry, " />
+
+<meta property="og:title" content="Model and State Representation Learning "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/model-and-state-representation-learning.html" />
+<meta property="og:description" content="Introduction The availability of compact and informative representations of sensor data is essential for robotics control and artificial intelligence (AI). In the past, these representations were created manually, but now Deep Learning provides a framework for learning them from data. This is especially important for robotics because the high-dimensional data …" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Blog" />
+<meta property="og:article:author" content="Gregor Semmler" />
+<meta property="og:article:published_time" content="2022-11-28T10:30:00+01:00" />
+<meta name="twitter:title" content="Model and State Representation Learning ">
+<meta name="twitter:description" content="Introduction The availability of compact and informative representations of sensor data is essential for robotics control and artificial intelligence (AI). In the past, these representations were created manually, but now Deep Learning provides a framework for learning them from data. This is especially important for robotics because the high-dimensional data …">
+
+        <title>Model and State Representation Learning  · Gregor Semmler&#39;s Blog
+</title>
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Blog - Full Atom Feed" />
+
+
+
+        <link rel="stylesheet" href="https://files.stork-search.net/basic.css" />
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Blog</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://gregorsemmler.github.io
+                                    >Home</a>
+                                </li>
+                                <!-- <li ><a href="https://gregorsemmler.github.io/categories">Categories</a></li> -->
+                                <!-- <li ><a href="https://gregorsemmler.github.io/tags">Tags</a></li> -->
+                                <li ><a href="https://gregorsemmler.github.io/archives">Archives</a></li>
+                                <!-- <li><form class="navbar-search" action="https://gregorsemmler.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li> -->
+                                <input class="navbar-search search-query" data-stork="sitesearch" type="text" placeholder="Search"/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div data-stork="sitesearch-output"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<main>
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://gregorsemmler.github.io/model-and-state-representation-learning.html">
+                Model and State Representation Learning
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h2>Introduction</h2>
+<p>The availability of compact and informative representations of sensor data is essential for robotics control and artificial intelligence (AI). In the past, these representations were created manually, but now Deep Learning provides a framework for learning them from data. This is especially important for robotics because the high-dimensional data from multiple sensors can be transformed into a much lower-dimensional state that contains only essential information for a particular task. Reinforcement learning algorithms use these low-dimensional states to learn controllers and take actions that maximize rewards.</p>
+<p>However, finding and defining interesting states for control tasks often requires a considerable amount of manual engineering. Thus, the goal is to learn these features with as little supervision as possible. State representation learning (SRL) is a type of feature learning that focuses on transforming observations into states, which can then be used for efficient policy learning. SRL is often framed in a control setup that favors small dimensions for the state space, ideally with a semantic meaning that correlates with some physical feature. For example, a state might consist of the coordinates and the speed in each dimension of an object.</p>
+<p>Learning in this context should be performed without explicit supervision, and the SRL literature may make use of knowledge about the physics of the world, interactions, and rewards whenever possible, serving as semi-supervision or self-supervision, which aids the challenge of learning state representations without explicit supervision. Building such models can exploit a large set of objectives or constraints, possibly taking inspiration from human learning. For example, infants expect objects to follow the principles of persistence, continuity, cohesion, and appearance-based attributes such as color and texture. </p>
+<p>SRL is a critical technique for robotics control and AI that allows for the efficient learning of low-dimensional state representations from high-dimensional sensor data. By using information about actions, their consequences in the observation space, and rewards, along with generic constraints on what a good state representation should be, SRL can automate the feature learning process with minimal supervision.</p>
+<h2>Benefits of Model-based Reinforcement Learning</h2>
+<p>Why is a model needed at all to perform reinforcement learning? There are several motivations behind creating a model during the RL process. [1]</p>
+<p><strong>Data Efficiency</strong>
+After building a model an agent can plan in this model for a desired amount of time before acting in the environment. This allows to extract as much information as possible from a minimal number of training steps. In real world environments like robotics or autonomous driving, where performing steps is expensive this can lead to a massive increase in the data and sample efficiency. Especially if failure is expensive or even dangerous, when for example harm to humans is possible, this improvement is of great benefit.</p>
+<p><strong>Exploration</strong>
+One of the fundamental challenges of RL is the question on how to balance exploration of rewarding unvisited states with the exploitation of the parts of the environment that are already known. If no model is available, then we have much more limited opportunities on how to design our exploration. The naivest approach here is <span class="math">\(\epsilon\)</span>-greedy exploration [2] where at each time step we pick one random possible action with a certain probability <span class="math">\(\epsilon\)</span>. In model-based approaches we have wide array of options instead. We can use different exploration strategies in planning compared to real environment steps. We can explore by following our current value estimates of states or by intrinsic motivation [3] where we define a metric on what makes a state interesting to explore, for example based on our uncertainty of the state or its novelty. We can also differ in how deep or how wide we explore the state space. </p>
+<p><strong>Transfer Learning</strong>
+Learning a model of the environment enables us to transfer this model to a similar environment, where the dynamics or the reward function differ. It also allows us to transfer knowledge learned from simulated environments into real-world environment without having the cost or risks of having to learn from scratch in the real world.</p>
+<p><strong>Safety</strong>
+Particularly for real-world applications, safety is extremely critical. A robot or a self-driving vehicle might destroy itself or other objects or hurt humans if no safeguards are in place. If we have an internal model of our surroundings and can propose estimates on which outcomes have which probability we can alleviate this. This can be done in diverse ways, for example by defining a safe region or having uncertainty estimates and verifying the safety of the current policy.</p>
+<p><strong>Explainability</strong>
+With the rise of more powerful artificial intelligence, it becomes increasingly more crucial to be able to explain their internal workings and mitigate their black-box nature [4]. By learning of a model of the environment we can make it more understandable and interpretable to a human. For example, we can learn symbolic representations, interpretable transition models, or preference models. Or we can use visual explanations like attention or have textual descriptions. Alternatively, we can use as a basis of the model specific formulas restricting the model or use fuzzy controllers [5].</p>
+<h2>Definitions</h2>
+<p>We have an agent acting in an environment. At every time step <span class="math">\(t\)</span> the agent collects an observation <span class="math">\(o_{t}\in{\mathcal{O}}\)</span> through its sensors and takes an action <span class="math">\(a_{t}\in{\mathcal{A}}\)</span> where <span class="math">\({\mathcal{O}}\)</span> is the observation space and <span class="math">\({\mathcal{A}}\)</span> is either a discrete or continuous action space. This leads to a state transition from the current state to the next state.</p>
+<p>In the reinforcement learning setting, the agent receives a reward <span class="math">\(r_t\)</span> defined by a reward function designed to steer the agent towards optimal behavior. </p>
+<p>The goal of State Representation Learning (SRL) is to learn a representation <span class="math">\(s_t \in \mathcal{S}\)</span> where <span class="math">\(\mathcal{S}\)</span> is the representation state space. We learn a mapping <span class="math">\(\phi\)</span> from the history of observations <span class="math">\(o_{1:t}\)</span>, actions <span class="math">\(a_{1:t}\)</span>  and rewards <span class="math">\(r_{1:t}\)</span> until time step <span class="math">\(t\)</span> to the representation:</p>
+<div class="math">$$s_{t}{=}\phi(o_{1:t},a_{1:t},r_{1:t})$$</div>
+<p>We are interested in the case where we don't have access to the true state and thus need to rely on unsupervised or self-supervised learning. This process often involves predicting a reconstruction of the observation, denoted by <span class="math">\({\hat{o}}_{t}\)</span>  and analogously we can reconstruct actions with <span class="math">\({\hat{a}}_{t}\)</span> and rewards with <span class="math">\({\hat{r}}_{t}\)</span>. </p>
+<h2>Types of Models</h2>
+<p><strong>Forward Model</strong>
+A forward model predicts the next state <span class="math">\(s_{t+1}\)</span> given a current state <span class="math">\(s_t\)</span> and action <span class="math">\(a_t\)</span>. It is the most widely used model for lookahead planning. First, we encode the information from <span class="math">\(o_t\)</span> to <span class="math">\(s_t\)</span>, followed by generating a prediction for the next state <span class="math">\(\hat{s}_{t+1}\)</span>. We can also put constraints on it, such as linear dynamics between <span class="math">\(s_t\)</span> and <span class="math">\(s_{t+1}\)</span>. The forward model equation can be represented as </p>
+<div class="math">$$\hat{s}_{t+1} = m_f(s_t, a_t)$$</div>
+<p>
+To learn the model, the error between the predicted state  <span class="math">\(\hat{s}_{t+1}\)</span> and the actual next state <span class="math">\(s_{t+1}\)</span> is backpropagated through both the transition and encoding models.</p>
+<p><strong>Inverse Model</strong>
+Given a state <span class="math">\(s_t\)</span> and a next state <span class="math">\(s_{t+1}\)</span>, (or observations <span class="math">\(o_t\)</span> and <span class="math">\(o_{t+1}\)</span>) the inverse model predicts which action <span class="math">\(a_t\)</span> would lead to the transition. 
+Again, we encode observations to receive the state representations, then predict the action: 
+</p>
+<div class="math">$$\hat{a}_t = m_i(s_t, s_{t+1})$$</div>
+<p>
+This way, the state can be designed to hold enough information to retrieve the action that caused the modification.</p>
+<p><strong>Backward Model</strong>
+In a backward model, we predict which previous state <span class="math">\(s_{t-1}\)</span> and previous action <span class="math">\(a_{t-1}\)</span>  led to a given state <span class="math">\(s_{t}\)</span> (or observation <span class="math">\(o_{t}\)</span>)
+</p>
+<div class="math">$$(\hat{s}_{t-1}, \hat{a}_{t-1}) = m_b(s_{t})$$</div>
+<p>
+This we way can plan in the backwards direction.</p>
+<h2>Frequently Used Approaches</h2>
+<p><strong>Siamese networks</strong></p>
+<p>Siamese networks [6] consist of multiple networks that are identical and share parameters, meaning that they have the same weights. The purpose of siamese architecture is not to categorize input data but to differentiate between inputs (for example, determining whether they belong to the same or different classes or conditions). This type of architecture is beneficial for imposing restrictions on the latent space of a neural network. </p>
+<p><img alt="siamese_schema" src="https://gregorsemmler.github.io/images/model_learning/siamese_schema.png"></p>
+<p><strong>Auto-encoders (AEs)</strong></p>
+<p>Auto-encoders consist of an encoder which maps the input into a latent space and a decoder which maps this latent representation back into the original input space. They are frequently utilized to acquire state representations and are widely employed for reducing the dimensionality of data. In our particular situation, we denote the input as <span class="math">\(o_t\)</span>  the latent representation as <span class="math">\(s_t\)</span>  and the reconstructed output as  <span class="math">\({\hat{o}}_{t}\)</span>  The dimension of the latent representation is determined by the dimension of the state representation we want to learn, and it can be constrained if necessary. The AE automatically learns a compact representation by minimizing the reconstruction error between input and output. The usual metric used to measure the reconstruction error is the mean squared error (MSE) between input and output, calculated pixel-wise, but other losses can also be employed. </p>
+<p><img alt="ae_schema" src="https://gregorsemmler.github.io/images/model_learning/ae_schema.png"></p>
+<p><strong>Denoising auto-encoders</strong></p>
+<p>A regular AE can be thought of as learning to compress and reconstruct an observation. Depending on the size and quality of the given dataset, a regular AE might find a solution that is too simple and does not generalize well.
+Denoising auto-encoders [7] [8] have the same basic structure and loss function as auto-encoders. Differently, in their training process random noise is added to each observation which needs to be removed in the reconstruction. This leads to a more robust encoder and decoder. </p>
+<p><strong>Variational auto-encoders (VAEs)</strong></p>
+<p>A variational auto-encoder [9] is an auto-encoder which maps the input to the parameters of a probability distribution of <span class="math">\(o_t\)</span>. This means we can interpret the encoder as distribution <span class="math">\(p_\theta(s_{t}|o_{t})\)</span> from which the states in <span class="math">\(\mathcal{S}\)</span> are sampled from, which we approximate with <span class="math">\(q_{{\phi}}{\big(}s_{t}{\big|}o_{t}{\big)}\)</span>, where <span class="math">\(\phi\)</span> are the parameters of the encoder. Similarly, the decoder represents the distribution <span class="math">\(p_\theta(o_{t}|s_{t})\)</span> and <span class="math">\(\theta\)</span> are the parameters of the decoder. Usually, the latent distribution is assumed to be a multivariate Gaussian with zero-mean and diagonal covariance: 
+</p>
+<div class="math">$$P(s_t) = \mathcal{N}(\mathbf{s}_t;\mathbf{0},\mathbf{I})$$</div>
+<p>There are two parts of the loss when training a VAE. Firstly, as in the regular AE, we have a reconstruction error (usually in the form of a mean-squared error). Secondly, there is a regularization error which tries to keep the latent distribution close to the prior distribution.</p>
+<p>Once trained, VAEs can be used generate new data, by sampling from this latent distribution of <span class="math">\(s_t\)</span> and then decoding it.</p>
+<p><img alt="vae_schema" src="https://gregorsemmler.github.io/images/model_learning/vae_schema.png"></p>
+<p>This basic version of the variational auto-encoder can be extended to versions which work on sequences of inputs, see for example  [10-21]. These approaches will be discussed in more detail in a future article.</p>
+<h2>Summary</h2>
+<p>This concludes a first overview over the motivation and the building blocks of model learning and state representation learning. In <a href="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html">the next part</a>, we will look at the core challenges, loss functions, and evaluation methods.</p>
+<h2>References</h2>
+<p>[1] T. M. Moerland, et al. <em>Model-based Reinforcement Learning: A Survey</em>. 2022</p>
+<p>[2] R. S. Sutton and A. G. Barto. <em>Reinforcement learning: An introduction</em>. 2018</p>
+<p>[3] N. Chentanez, A. G. Barto and S. Singh. <em>Intrinsically Motivated Reinforcement Learning</em>. 2004</p>
+<p>[4] G. Vilone and L. Longo. <em>Explainable artificial intelligence: a systematic review</em>. arXiv preprint arXiv:2006.00093. 2020</p>
+<p>[5] C. Glanois, et al. <em>A Survey on Interpretable Reinforcement Learning</em>. arXiv preprint arXiv:2112.13112. 2021</p>
+<p>[6] S. Chopra, R. Hadsell and Y. LeCun. <em>Learning a Similarity Metric Discriminatively, with Application to Face Verification</em>. 2005 IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR'05), 1. 539-546. 2005</p>
+<p>[7] P. Vincent, et al. <em>Extracting and composing robust features with denoising autoencoders</em>. Proceedings of the 25th international conference on Machine learning - ICML '08. 1096-1103. 2008</p>
+<p>[8] P. Vincent, et al. <em>Stacked denoising autoencoders: Learning useful representations in a deep network with a local denoising criterion</em>. Journal of machine learning research, 11. 2010</p>
+<p>[9] D. P. Kingma and M. Welling. <em>Auto-Encoding Variational Bayes</em>. arXiv preprint arXiv:1312.6114. 2013</p>
+<p>[10] M. Watter, et al. <em>Embed to Control: A Locally Linear Latent Dynamics Model for Control from Raw Images</em>. arXiv: Learning. 2015</p>
+<p>[11] J. Bayer and C. Osendorfer. <em>Learning Stochastic Recurrent Networks</em>. ArXiv. 2014</p>
+<p>[12] R. G. Krishnan, U. Shalit and D. Sontag. <em>Deep kalman filters</em>. arXiv preprint arXiv:1511.05121. 2015</p>
+<p>[13] J. Chung, et al. <em>A recurrent latent variable model for sequential data</em>. Advances in neural information processing systems, 28. 2015</p>
+<p>[14] M. Fraccaro, et al. <em>Sequential neural models with stochastic layers</em>. Advances in neural information processing systems, 29. 2016</p>
+<p>[15] R. Krishnan, U. Shalit and D. Sontag. <em>Structured Inference Networks for Nonlinear State Space Models</em>. Proceedings of the AAAI Conference on Artificial Intelligence, 31. 2017</p>
+<p>[16] M. Fraccaro, et al. <em>A Disentangled Recognition and Nonlinear Dynamics Model for Unsupervised Learning</em>. Advances in neural information processing systems, 30. 3601-3610. 2017</p>
+<p>[17] M. Karl, et al. <em>Deep Variational Bayes Filters: Unsupervised Learning of State Space Models from Raw Data</em>. arXiv preprint arXiv:1605.06432. 2017</p>
+<p>[18] A. Goyal, et al. <em>Z-Forcing: Training Stochastic Recurrent Networks</em>. ArXiv. 2017</p>
+<p>[19] W. Hsu, Y. Zhang and J. R. Glass. <em>Unsupervised Learning of Disentangled and Interpretable Representations from Sequential Data</em>. 2017</p>
+<p>[20] Y. Li and S. Mandt. <em>Disentangled Sequential Autoencoder</em>. 2018</p>
+<p>[21] S. Leglaive, et al. <em>A Recurrent Variational Autoencoder for Speech Enhancement</em>. ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP). 371-375. 2020</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+<section>
+    <h6 style="display:none;">Comments</h6>
+    <p id="comment-message"> </p>
+
+    <div class="accordion" id="accordion2">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
+                   data-toggle="collapse"
+                   data-parent="#accordion2"
+                   data-disqus-identifier="https://gregorsemmler.github.io/model-and-state-representation-learning.html"
+                   href="https://gregorsemmler.github.io/model-and-state-representation-learning.html#comment_thread"
+                   id="comment-accordion-toggle">
+                    Comments
+                </a>
+            </div>
+            <div id="comment_thread" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <div class="comments">
+                        <div id="disqus_thread"></div>
+                        <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = 'https://gregorsemmler.github.io/model-and-state-representation-learning.html';
+    this.page.identifier = 'https://gregorsemmler.github.io/model-and-state-representation-learning.html';
+    };
+     */
+    var disqus_identifier = 'https://gregorsemmler.github.io/model-and-state-representation-learning.html';
+    var disqus_url = 'https://gregorsemmler.github.io/model-and-state-representation-learning.html';
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://gregor-s.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2022-11-28T10:30:00+01:00">Mo 28 November 2022</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+</main>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://gregorsemmler.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        <script src="https://files.stork-search.net/releases/v1.5.0/stork.js"></script>
+        <script>
+            stork.register("sitesearch", "https://gregorsemmler.github.io/search-index.st")
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

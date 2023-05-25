@@ -1,7 +1,815 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gregor Semmler's Website</title><link href="https://gregorsemmler.github.io/" rel="alternate"></link><link href="https://gregorsemmler.github.io/feeds/all.atom.xml" rel="self"></link><id>https://gregorsemmler.github.io/</id><updated>2022-10-20T16:18:00+02:00</updated><entry><title>Learning to pay attention</title><link href="https://gregorsemmler.github.io/learning-to-pay-attention.html" rel="alternate"></link><published>2022-10-20T16:18:00+02:00</published><updated>2022-10-20T16:18:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-10-20:/learning-to-pay-attention.html</id><summary type="html">&lt;p&gt;For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …&lt;/p&gt;</summary><content type="html">&lt;p&gt;For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks have achieved remarkable results in various applications in recent years. However, for a human observer it is mostly incomprehensible how the neural network has come to its conclusion, therefore not allowing deeper analysis of both correct and incorrect outputs. If we could teach a machine learning model to learn to pay attention to specific parts of an input image it would allow us to interpret which parts are deemed most important, leading to a more interpretable and explainable process.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gregor Semmler's Blog</title><link href="https://gregorsemmler.github.io/" rel="alternate"></link><link href="https://gregorsemmler.github.io/feeds/all.atom.xml" rel="self"></link><id>https://gregorsemmler.github.io/</id><updated>2023-05-10T17:09:00+02:00</updated><entry><title>State of the art Model-based Reinforcement Learning</title><link href="https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html" rel="alternate"></link><published>2023-05-10T17:09:00+02:00</published><updated>2023-05-10T17:09:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2023-05-10:/state-of-the-art-model-based-reinforcement-learning.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Deep reinforcement learning has shown its effectiveness in among other things, recent advances in game playing and robotics. For instance, machines can now learn to play games like Atari [1] and Go [2, 3] from scratch and reach superhuman performance. However, the data efficiency of learning from experience is …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Deep reinforcement learning has shown its effectiveness in among other things, recent advances in game playing and robotics. For instance, machines can now learn to play games like Atari [1] and Go [2, 3] from scratch and reach superhuman performance. However, the data efficiency of learning from experience is still a challenge, and research is focused on finding ways to speed up the learning process. One promising approach is to create an internal model of the environment, which can reduce the number of samples required to update the agent's behavior. &lt;/p&gt;
+&lt;p&gt;The accuracy of a learned model is critical for the success of the model-based approach to reinforcement learning. However, the trade-off between accuracy and the number of samples needed is especially challenging in high-dimensional problems [4].&lt;/p&gt;
+&lt;p&gt;In this article we will go over some of the state-of-the-art model-based reinforcement algorithms. We will look differentiate the approaches whether they perform explicit or implicit planning and whether the transitions are given or not [5]. &lt;/p&gt;
+&lt;h2&gt;Explicit Planning on given Transitions&lt;/h2&gt;
+&lt;p&gt;If we already know the exact transitions of the problems to be solved, we can program a simulation that we can use for planning. One example for this are board games.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;AlphaZero&lt;/strong&gt; and &lt;strong&gt;AlphaGo Zero&lt;/strong&gt; [2, 3] are self-play curriculum learning programs developed to play complex board games such as Go, chess, and shogi. They use a single neural network with a value head and a policy head to learn the optimal policy and value functions. The loss is a sum of the policy loss and value loss. The planning algorithm is based on Monte Carlo Tree Search (MCTS) [6], and the residual network is used in the evaluation and selection of MCTS. The self-play mechanism starts from a randomly initialized resnet, and MCTS is used to play a tournament of games to generate training positions for the resnet to be added to a replay buffer from which the model is trained. AlphaZero is currently the strongest player in Go, chess, and shogi. &lt;/p&gt;
+&lt;p&gt;An &lt;em&gt;example implementation&lt;/em&gt; of the method can be found at &lt;a href="https://github.com/gregorsemmler/alphazero"&gt;https://github.com/gregorsemmler/alphazero&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Explicit Planning on learned Transitions&lt;/h2&gt;
+&lt;p&gt;If the transitions are not given, we must learn the transition model at the same time as we then plan on it.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;PILCO&lt;/strong&gt; &lt;strong&gt;(Probabilistic Inference for Learning Control)&lt;/strong&gt;  [7] is a method that approximates a transition model as a Gaussian Process [8] for smaller models. This approach is good for simple processes with good sample efficiency but needs more samples for high dimensional problems. PILCO treats the dynamics model as a probabilistic function and incorporates model uncertainty into long-term planning. The policy is improved based on analytically computed gradients. However, Gaussian Processes do not scale to high dimensional environments and are limited to smaller applications. PILCO has been used successfully for small problems like Mountain car and Cartpole pendulum swings.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;PETS&lt;/strong&gt; &lt;strong&gt;(Probabilistic Ensembles with Trajectory Sampling)&lt;/strong&gt; [9] uses ensembles to handle both epistemic and aleatoric uncertainty. PETS combines a probabilistic deep network model with sampling-based uncertainty propagation to model the dynamics of the environment. The agent applies the first action from the optimal sequence determined by the cross-entropy method (CEM) [10, 11] and re-plans at every time-step using model-predictive control (MPC) [12]. The method is tested on simulated robot tasks such as Half-Cheetah, Pusher, and Reacher, and it is reported to approach asymptotic model-free baselines, demonstrating the importance of uncertainty estimation in model-based reinforcement learning.&lt;/p&gt;
+&lt;p&gt;An &lt;em&gt;example implementation&lt;/em&gt; of the method can be found at &lt;a href="https://github.com/gregorsemmler/pets"&gt;https://github.com/gregorsemmler/pets&lt;/a&gt;. See also &lt;a href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html"&gt;this article&lt;/a&gt; in which it is demonstrated on how to apply this method to a real-life robot to learn how to drive in less than ten trials.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Visual Foresight&lt;/strong&gt; [13, 14] is a method that aims to generalize deep learning methods to never-before-seen tasks and objects, allowing robots to learn complex manipulation skills from high-dimensional raw sensory pixel inputs. This approach combines deep action-conditioned video prediction models with model-predictive control (MPC) [12] and uses entirely unlabeled training data, eliminating the need for human supervision. It uses a training procedure where data is sampled according to a probability distribution, while a video prediction model is trained with the samples. The approach does not require a calibrated camera, an instrumented training set-up, nor precise sensing and actuation. At test time, three distinct goal specification methods are explored: designated pixels, goal images, and image classifiers. The actions are selected according to MPC. The results demonstrate that the method can generalize to never-before-seen objects—both rigid and deformable—and solve a range of user-defined object manipulation tasks using the same model and can perform multi-object manipulation, pushing, picking, and placing, and cloth-folding tasks.&lt;/p&gt;
+&lt;h3&gt;Hybrid Model-Free / Model-Based Imagination&lt;/h3&gt;
+&lt;p&gt;We can also combine model-free and model-based methods in our approach.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MB-MPO&lt;/strong&gt; &lt;strong&gt;(Model-based Reinforcement Learning via Meta-Policy Optimization)&lt;/strong&gt; [15] Model-based reinforcement learning approaches aim to be data efficient but struggle to achieve the same asymptotic performance as model-free methods due to challenges in learning dynamics models that match the real-world dynamics. To address this, MB-MPO is proposed as an approach that meta-learns a policy using an ensemble of learned dynamic models, enabling quick adaptation to any model in the ensemble with one policy gradient step. MB-MPO builds on the MAML [16] meta-learning framework and is evaluated on continuous control benchmark tasks in a robotics simulator, where it shows more robustness to model imperfections and approaches the performance of model-free methods with significantly less experience. The planning part of the algorithm samples imagined trajectories.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MBPO&lt;/strong&gt; &lt;strong&gt;(Model-based Policy Optimization)&lt;/strong&gt; [17] is a method with a guarantee of monotonic improvement at each step. The empirical estimate of model generalization can be incorporated into the analysis to justify model usage. Using short model-generated rollouts combined with real data, MBPO achieves the benefits of more complicated model-based algorithms without the usual pitfalls. The approach surpasses the sample efficiency of prior model-based methods, matches the asymptotic performance of the best model-free algorithms, and scales to horizons that cause other model-based methods to fail entirely. The approach uses an ensemble of probabilistic networks, similar to PETS, [9] and employs Soft-actor-critic [18] as the reinforcement learning method. Experiments on simulated robotics tasks, including Hopper, Walker, Half-Cheetah, and Ant, demonstrate that the policy optimization algorithm learns substantially faster with short rollouts than other algorithms while retaining asymptotic performance relative to model-free algorithms.&lt;/p&gt;
+&lt;h2&gt;Latent Models&lt;/h2&gt;
+&lt;p&gt;Latent models substitute the single transition model with several models based on deep neural networks for the different parts of the algorithm. Here we can have models for transitions, rewards, observations and representations [5].&lt;/p&gt;
+&lt;p&gt;The &lt;strong&gt;Value Prediction Network (VPN)&lt;/strong&gt; [19] approach integrates both model-free and model-based reinforcement learning methods into a single neural network. It learns a dynamics model that predicts future values instead of future observations. VPN combines temporal-difference search and n-step Q-learning [20] for training and performs lookahead planning to choose actions. The VPN architecture consists of four modules: encoding, transition, outcome, and value. It uses imagination to update the policy and performs planning up to a planning horizon using a simple rollout algorithm. Experimental results show that VPN outperforms both model-free and model-based baselines in a stochastic environment where building an accurate observation-prediction model is difficult. It also outperforms Deep Q-Network (DQN) [1] on several Atari games.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Simulated policy learning (SimPLe)&lt;/strong&gt; [21] is a method of model-based reinforcement learning that uses stochastic video prediction techniques to predict future frames of a video. It combines model-free work on video prediction using variational auto-encoders, recurrent world models, and generative models with model-based work. SimPLe uses a variational auto-encoder to create a latent model that can deal with limited observation frames. The policy optimization is done using the model-free PPO [22] algorithm. In experiments, SimPLe has been found to be more sample efficient than the Rainbow [23] algorithm on 26 Atari games when learning with 100,000 sample steps.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Deep Planning Network (PlaNet)&lt;/strong&gt; [24] is an agent that learns to interact with the environment by learning its dynamics from images and planning its actions in a hidden space. To improve its performance, PlaNet uses a model with both deterministic and stochastic transitions, along with a multi-step variational inference objective called latent overshooting. PlaNet uses a Recurrent State Space Model (RSSM) [25] with a transition model, observation model, variational encoder, and reward model. It adapts its plan using a Model-Predictive Control agent and replans each step using the Cross-Entropy-Method (CEM) to find the best action sequence. PlaNet does not use a policy or value network. Despite using only pixel observations, it solves complex tasks such as continuous control with contact dynamics, partial observability, and sparse rewards, outperforming model-free algorithms with fewer episodes and reaching final performance similar or higher than model-free algorithms. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Dreamer&lt;/strong&gt; [26] is a reinforcement learning agent building on PlaNet [24] that solves long-horizon tasks from images through imagination. It uses world models that predict actions and values and enable interpolating between past experiences. Dreamer's latent models include a representation model, an observation model, a transition model, and a reward model that allow it to plan potential action sequences without executing them in the environment. It does this using an actor-critic approach, which involves both learning a policy (the actor) for selecting actions and estimating the value of states or actions (the critic) to guide the learning process. By taking future rewards into account, Dreamer can learn to make decisions that lead to better long-term outcomes. Dreamer backpropagates through the value model to learn behaviors that consider rewards beyond the horizon. It achieves high performance on 20 visual control tasks from the DeepMind control suite, exceeding existing approaches in data-efficiency, computation time, and final performance.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Plan2Explore&lt;/strong&gt; [27] is a type of agent that uses a technique called self-supervised reinforcement learning to overcome the challenges of learning specific tasks and making the most of the samples. This agent explores and adapts to new tasks without prior knowledge during exploration, which helps it operate more efficiently. Unlike other methods that evaluate observations for novelty after the agent has already reached them, Plan2Explore uses planning to identify anticipated future novelty during exploration. After exploration, the agent quickly adapts to different tasks, using zero-shot [28] learning. Plan2Explore learns about the world it operates in through unsupervised exploration and uses this knowledge to solve zero-shot and few-shot tasks. Plan2Explore is built on PlaNet [24] and Dreamer [26] learning dynamics models and uses similar latent models such as an image encoder, dynamics, reward predictor, and image decoder. Plan2Explore showed impressive performance in zero-shot learning on the DeepMind Control Suite, matching Dreamer's supervised reinforcement learning performance without task-specific interaction or training supervision. It outperforms prior self-supervised exploration methods and almost matches the performance of an oracle that has access to rewards.&lt;/p&gt;
+&lt;h2&gt;End-to-End Planning / Transitions with Latent Models&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Imagination-Augmented Agents (I2A)&lt;/strong&gt; [29, 30, 31] is an advanced deep reinforcement learning architecture that enhances data efficiency, performance, and robustness compared to many other methods. Instead of specifying how a model should be used to reach a policy, I2A leverage a learned environment model to create implicit plans in deep policy networks.&lt;/p&gt;
+&lt;p&gt;To deal with imperfections that may arise from model-based algorithms, the I2A algorithm introduces a latent model, which is trained without supervision from agent trajectories and utilizes a recurrent architecture with a CNN. The essential components of the I2A architecture are a plan-construction manager, an action policy creator controller, an environment model for imagination, and a memory. I2A employs a manager or meta-controller that decides between executing actions in the environment or imagination, even when the model crudely captures the environmental dynamics.&lt;/p&gt;
+&lt;p&gt;The I2A architecture has been successfully deployed in Sokoban and MiniPacman, achieving excellent performance with minimal data and imperfect models. Pascanu et al. [30] applied the I2A approach to a maze and spaceship task, demonstrating that I2A surpasses model-free and planning algorithms (MCTS).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;World Models&lt;/strong&gt; [32] are recurrent neural networks that generate states for simulation in an unsupervised manner. These models learn a compressed representation of the environment's spatial and temporal aspects. The resulting features can be used to train a simple and compact policy that solves tasks, with planning taking place in the simplified world. The controller model maps directly to actions, while the World Models architecture includes a vision model, a memory model, and a controller. Typically, the vision model is trained with a variational auto-encoder in an unsupervised manner, and the memory model is approximated using a mixture density network of a Gaussian distribution (MDN-RNN). Dreams or rollouts in World Models are distinguished from real environment samples. One of the benefits of World Models is that a policy can be trained entirely within the dream, using imagination only, and then transferred to the actual environment. VizDoom tasks such as Car Racing have been experimentally explored using World Models.&lt;/p&gt;
+&lt;p&gt;Developing agents with planning capabilities has been a challenge for artificial intelligence researchers. Although tree-based planning methods have been effective in domains like chess and Go where a perfect simulator exists, the dynamics of real-world environments are often intricate and obscure. 
+However, the &lt;strong&gt;MuZero&lt;/strong&gt; [33] algorithm, which combines a learned model with a tree-based search, has achieved superhuman performance in challenging and visually complex domains without any prior knowledge of their underlying dynamics. The algorithm iteratively applies a learned model to predict the reward, action-selection policy, and value function. Unlike AlphaZero [3], which had access to the game rules, MuZero matched AlphaZero's superhuman performance on Go, chess, and shogi without any prior knowledge of the game rules. MuZero utilizes an architecture with distinct modules, such as representation, dynamics, and prediction functions. The dynamics function is a recurrent process that calculates transition and reward, while the prediction function computes policy and value functions. For planning, MuZero uses a variant of MCTS without rollouts and with P-UCT as a selection rule. It performs well on Atari games and board games, learning to play the games from scratch after learning the rules from the environment. &lt;/p&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;In this article we have looked at several state-of-the-art model-based reinforcement learning algorithms, differentiating between explicit or implicit planning, and given or learned transitions are given and end-to-end planning approaches.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] V. Mnih, et al. &lt;em&gt;Playing Atari with Deep Reinforcement Learning&lt;/em&gt;. arXiv preprint arXiv:1312.5602. 2013&lt;/p&gt;
+&lt;p&gt;[2] D. Silver, et al. &lt;em&gt;Mastering the game of Go without human knowledge&lt;/em&gt;. Nature, 550. 354-359. 2017&lt;/p&gt;
+&lt;p&gt;[3] D. Silver, et al. &lt;em&gt;A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play.&lt;/em&gt;. Science, 362. 1140-1144. 2018&lt;/p&gt;
+&lt;p&gt;[4] A. Plaat, W. Kosters and M. Preuss. &lt;em&gt;High-accuracy model-based reinforcement learning, a survey&lt;/em&gt;. arXiv preprint arXiv:2107.08241. 2021&lt;/p&gt;
+&lt;p&gt;[5] A. Plaat, W. Kosters and M. Preuss. &lt;em&gt;Model-based deep reinforcement learning for high-dimensional problems, a survey&lt;/em&gt;. arXiv preprint arXiv:2008.05598. 2020&lt;/p&gt;
+&lt;p&gt;[6] C. Browne, et al. &lt;em&gt;A Survey of Monte Carlo Tree Search Methods&lt;/em&gt;. IEEE Transactions on Computational Intelligence and AI in Games, 4. 1-43. 2012&lt;/p&gt;
+&lt;p&gt;[7] M. P. Deisenroth and C. E. Rasmussen. &lt;em&gt;PILCO: A Model-Based and Data-Efficient Approach to Policy Search&lt;/em&gt;. Proceedings of the 28th International Conference on International Conference on Machine Learning. 465–472. 2011&lt;/p&gt;
+&lt;p&gt;[8] C. E. Rasmussen and C. K. Williams. &lt;em&gt;Gaussian processes for machine learning&lt;/em&gt;. 2006&lt;/p&gt;
+&lt;p&gt;[9] K. Chua, et al. &lt;em&gt;Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models&lt;/em&gt;. 2018&lt;/p&gt;
+&lt;p&gt;[10] R. Rubinstein. &lt;em&gt;The cross-entropy method for combinatorial and continuous optimization&lt;/em&gt;. Methodology and computing in applied probability, 1. 127–190. 1999&lt;/p&gt;
+&lt;p&gt;[11] C. Pinneri, et al. &lt;em&gt;Sample-efficient cross-entropy method for real-time planning&lt;/em&gt;. Conference on Robot Learning. 1049–1065. 2021&lt;/p&gt;
+&lt;p&gt;[12] E. F. Camacho and C. B. Alba. &lt;em&gt;Model predictive control&lt;/em&gt;. 2013&lt;/p&gt;
+&lt;p&gt;[13] C. Finn and S. Levine. &lt;em&gt;Deep Visual Foresight for Planning Robot Motion&lt;/em&gt;. arXiv: Learning. 2016&lt;/p&gt;
+&lt;p&gt;[14] F. Ebert, et al. &lt;em&gt;Visual Foresight: Model-Based Deep Reinforcement Learning for Vision-Based Robotic Control.&lt;/em&gt;. arXiv: Robotics. 2018&lt;/p&gt;
+&lt;p&gt;[15] I. Clavera, et al. &lt;em&gt;Model-based reinforcement learning via meta-policy optimization&lt;/em&gt;. Conference on Robot Learning. 617–629. 2018&lt;/p&gt;
+&lt;p&gt;[16] C. Finn, P. Abbeel and S. Levine. &lt;em&gt;Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks&lt;/em&gt;. arXiv: Learning. 2017&lt;/p&gt;
+&lt;p&gt;[17] M. Janner, et al. &lt;em&gt;When to Trust Your Model: Model-Based Policy Optimization&lt;/em&gt;. 2019&lt;/p&gt;
+&lt;p&gt;[18] T. Haarnoja, et al. &lt;em&gt;Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor&lt;/em&gt;. arXiv: Learning. 2018&lt;/p&gt;
+&lt;p&gt;[19] J. Oh, S. Singh and H. Lee. &lt;em&gt;Value Prediction Network&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[20] C. Watkins. &lt;em&gt;Learning from delayed rewards&lt;/em&gt;. 1989&lt;/p&gt;
+&lt;p&gt;[21] L. Kaiser, et al. &lt;em&gt;Model-Based Reinforcement Learning for Atari&lt;/em&gt;. arXiv: Learning. 2019&lt;/p&gt;
+&lt;p&gt;[22] J. Schulman, et al. &lt;em&gt;Proximal Policy Optimization Algorithms&lt;/em&gt;. arXiv: Learning. 2017&lt;/p&gt;
+&lt;p&gt;[23] M. Hessel, et al. &lt;em&gt;Rainbow: Combining Improvements in Deep Reinforcement Learning&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[24] D. Hafner, et al. &lt;em&gt;Learning Latent Dynamics for Planning from Pixels&lt;/em&gt;. Proceedings of the 36th International Conference on Machine Learning. 2555-2565. 2019&lt;/p&gt;
+&lt;p&gt;[25] J. Chung, et al. &lt;em&gt;A recurrent latent variable model for sequential data&lt;/em&gt;. Advances in neural information processing systems, 28. 2015&lt;/p&gt;
+&lt;p&gt;[26] D. Hafner, et al. &lt;em&gt;Dream to Control: Learning Behaviors by Latent Imagination&lt;/em&gt;. arXiv preprint arXiv:1912.01603. 2019&lt;/p&gt;
+&lt;p&gt;[27] R. Sekar, et al. &lt;em&gt;Planning to Explore via Self-Supervised World Models&lt;/em&gt;. International Conference on Machine Learning. 8583–8592. 2020&lt;/p&gt;
+&lt;p&gt;[28] W. Wang, et al. &lt;em&gt;A Survey of Zero-Shot Learning: Settings, Methods, and Applications&lt;/em&gt;. ACM Transactions on Intelligent Systems and Technology, 10. 1-37. 2019&lt;/p&gt;
+&lt;p&gt;[29] L. Buesing, et al. &lt;em&gt;Learning and Querying Fast Generative Models for Reinforcement Learning&lt;/em&gt;. arXiv: Learning. 2018&lt;/p&gt;
+&lt;p&gt;[30] R. Pascanu, et al. &lt;em&gt;Learning model-based planning from scratch&lt;/em&gt;. arXiv preprint arXiv:1707.06170. 2017&lt;/p&gt;
+&lt;p&gt;[31] S. Racanière, et al. &lt;em&gt;Imagination-Augmented Agents for Deep Reinforcement Learning&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[32] D. Ha and J. Schmidhuber. &lt;em&gt;World Models&lt;/em&gt;. arXiv: Learning. 2018&lt;/p&gt;
+&lt;p&gt;[33] J. Schrittwieser, et al. &lt;em&gt;Mastering Atari, Go, chess and shogi by planning with a learned model&lt;/em&gt;. Nature, 588. 604–609. 2020&lt;/p&gt;</content><category term="Entry"></category></entry><entry><title>Variational Autoencoders for State Space Models</title><link href="https://gregorsemmler.github.io/variational-autoencoders-for-state-space-models.html" rel="alternate"></link><published>2023-04-07T08:23:00+02:00</published><updated>2023-04-07T08:23:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2023-04-07:/variational-autoencoders-for-state-space-models.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the last article we have introduced state space models and how to extend the concept of the variational auto-encoder to them and how to train them. We will now look at several examples of VAEs for SSMs in more detail.&lt;/p&gt;
+&lt;h2&gt;Deep Kalman Filter&lt;/h2&gt;
+&lt;p&gt;The Deep Kalman Filter [1 …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the last article we have introduced state space models and how to extend the concept of the variational auto-encoder to them and how to train them. We will now look at several examples of VAEs for SSMs in more detail.&lt;/p&gt;
+&lt;h2&gt;Deep Kalman Filter&lt;/h2&gt;
+&lt;p&gt;The Deep Kalman Filter [1] is based on the same graphical model as the Kalman Filter described above. But instead, neural networks are used to encode the information into a latent space and decode it back into the original dimension.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="ssm_example" src="https://gregorsemmler.github.io/images/model_learning/ssm_example.png"&gt;&lt;/p&gt;
+&lt;p&gt;According to the rules of d-separation we can observe that the &lt;span class="math"&gt;\(s_{t-1}\)&lt;/span&gt; node separates all observations &lt;span class="math"&gt;\(o_{&amp;lt;t}\)&lt;/span&gt;, actions &lt;span class="math"&gt;\(a_{&amp;lt;t}\)&lt;/span&gt;  from &lt;span class="math"&gt;\(s_t\)&lt;/span&gt;. Or more formally, &lt;span class="math"&gt;\(s_t \perp o_i|s_{t-1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(s_t \perp a_i|s_{t-1}\)&lt;/span&gt; for &lt;span class="math"&gt;\(i &amp;lt; t\)&lt;/span&gt; such that the posterior distribution simplifies to&lt;/p&gt;
+&lt;div class="math"&gt;$$p_{\theta}\left(\mathbf{s}_{1:T}\mid\mathbf{o}_{1:T},\mathbf{a}_{1:T}\right)=\prod_{t=1}^{T}p_{\theta}\left(\mathbf{s}_{t} \mid \mathbf{s}_{t-1},\mathbf{o}_{t:T},\mathbf{a}_{t:T}\right)$$&lt;/div&gt;
+&lt;p&gt;Similarly, we can deduce the following simplifications:&lt;/p&gt;
+&lt;div class="math"&gt;$$p_\theta\left({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1: t},{\bf a}_{1: t}\right)=p_\theta\left({\bf o}_{t}\vert{\bf s}_{t}\right)$$&lt;/div&gt;
+&lt;div class="math"&gt;$$p_\theta\left(\mathbf{s}_{t}|\mathbf{o}_{1:t-1},\mathbf{s}_{1:t-1},\mathbf{a}_{1:t}\right)=p_\theta \left(\mathbf{s}_{t}|\mathbf{s}_{t-1},\mathbf{a}_{t}\right)$$&lt;/div&gt;
+&lt;p&gt;
+Therefore, the VLB becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{L}(\theta,\phi;{\bf o}_{1:T},{\bf a}_{1:T}) = \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_\theta({\bf o}_{t}\vert{\bf s}_{t})\big]} -$$&lt;/div&gt;
+&lt;div class="math"&gt;$$- \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[D_{\mathrm{KL}}\big( q_\phi(\mathbf{s}_{t}|\mathbf{s}_{t-1},\mathbf{o}_{t:T},\mathbf{a}_{t:T})\parallel\ p_{\theta}(\mathbf{s}_{t}|\mathbf{s}_{t-1},\mathbf{a}_{t})\big)\big]}$$&lt;/div&gt;
+&lt;p&gt;Krishnan et al. [1] proposed four different neural network models which represent approximations to different probability distributions:
+- A neural network for the current state, observation, and action &lt;span class="math"&gt;\(q_\phi({\bf s}_t|{\bf o}_{t},{\bf a}_{t})\)&lt;/span&gt; 
+- A neural network for the recent past and future &lt;span class="math"&gt;\(q_\phi({\bf s}_t|{\bf o}_{t-1:t+1}, {\bf a}_{t-1:t+1})\)&lt;/span&gt;
+- An RNN modelling the complete past &lt;span class="math"&gt;\(q_\phi({\bf s}_t|{\bf o}_{1:t},{\bf a}_{1:t})\)&lt;/span&gt;
+- An RNN modelling the whole sequence &lt;span class="math"&gt;\(q_\phi({\bf s}_t|{\bf o}_{1:T},{\bf a}_{1:T})\)&lt;/span&gt;&lt;/p&gt;
+&lt;h2&gt;Deep Variational Bayes Filter&lt;/h2&gt;
+&lt;p&gt;The Deep Variational Bayes Filter [2] modifies the graphical model to include stochastic parameters &lt;span class="math"&gt;\(\beta_t\)&lt;/span&gt;, which consists of two added terms &lt;span class="math"&gt;\(v_t\)&lt;/span&gt; and &lt;span class="math"&gt;\(w_t\)&lt;/span&gt;.  The former is a noise parameter independent of the input, the latter is noise depending on the input. It is a regularizing prior on the &lt;/p&gt;
+&lt;p&gt;The transition model is assumed to depend on these parameters and factorize in the following way, where &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; only depends on the previous state &lt;span class="math"&gt;\(s_{t-1}\)&lt;/span&gt; and no other states as well:&lt;/p&gt;
+&lt;div class="math"&gt;$$p({\bf s}_{1:T}\mid\beta_{1:T},{\bf a}_{1:T})=\prod_{t=1}^{T}p({\bf s}_{t}\mid{\bf s}_{t-1},{\bf a}_{t},\beta_{t})$$&lt;/div&gt;
+&lt;p&gt;For the observation model the assumption is made that the current state &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; contains all necessary information about the current observation &lt;span class="math"&gt;\(o_t\)&lt;/span&gt;:&lt;/p&gt;
+&lt;div class="math"&gt;$$p({\bf o}_{1:T}\mid{\bf s}_{1:T},{\bf a}_{1:T})=\prod_{t=1}^{T}p({\bf o}_{t}\mid{\bf s}_{t})$$&lt;/div&gt;
+&lt;p&gt;
+The approximate recognition model is designed as:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$q_{\phi}({\bf{\beta}}_{1:T}\mid{\bf o}_{1:T})=q_{\phi}({\bf w}_{1:T}\mid{\bf o}_{1:T})\,q_{\phi}({\bf v}_{1:T})$$&lt;/div&gt;
+&lt;p&gt;&lt;img alt="dvbf-graphical-model" src="https://gregorsemmler.github.io/images/model_learning/dvbf-graphical-model.png"&gt;&lt;/p&gt;
+&lt;p&gt;The VLB of a DVBF is derived as &lt;/p&gt;
+&lt;p&gt;&lt;span class="math"&gt;\({\mathcal{L}}_{\mathrm{DVBF}}(\mathbf{o}_{1:T},\theta,\phi\mid\mathbf{a}_{1:T}) = \mathbb{E}_{q_{\phi}}[\log p_{\theta}(\mathbf{o}_{1:T}\mid\mathbf{s}_{1:T})]-D_{\mathrm{KL}}(q_{\phi}(\beta_{1:T}\mid\mathbf{o}_{1:T},\mathbf{a}_{1:T})\mid p(\beta_{1:T}))\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Where again, the first term is a reconstruction error, and the second term is a regularization term to keep the approximate distribution close to the prior of &lt;span class="math"&gt;\(\beta_{1:T}\)&lt;/span&gt;. &lt;/p&gt;
+&lt;p&gt;How the transitions themselves and the parameters &lt;span class="math"&gt;\(w_t\)&lt;/span&gt; look like, can be chosen according to the application. For example, one approach is to model a locally linear transition model, where the filter learns a number of transition matrices similar to a Kalman filter and weighing parameters &lt;span class="math"&gt;\(\alpha_i\)&lt;/span&gt; to arrive at the final matrices as a linear combination of these matrices. But nonlinear-transitions can be implemented as well.&lt;/p&gt;
+&lt;p&gt;An &lt;strong&gt;example implementation&lt;/strong&gt; of a DVBF with locally linear transitions can be found here: &lt;a href="https://github.com/gregorsemmler/pytorch-dvbf"&gt;https://github.com/gregorsemmler/pytorch-dvbf&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Variational Recurrent Neural Networks&lt;/h2&gt;
+&lt;p&gt;In Variational Recurrent Neural Networks [3] we have internal determinstic states &lt;span class="math"&gt;\(h_t\)&lt;/span&gt;, denoted by a diamond shape in the graphical model, and implemented with an RNN.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="vrnn-graphical-model-v2-fixed" src="https://gregorsemmler.github.io/images/model_learning/vrnn-graphical-model-v2-fixed.png"&gt;&lt;/p&gt;
+&lt;p&gt;We start with an initial internal state &lt;span class="math"&gt;\(h_1\)&lt;/span&gt; and action &lt;span class="math"&gt;\(a_1\)&lt;/span&gt; from which the first state &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; is generated, after which &lt;span class="math"&gt;\(o_1\)&lt;/span&gt; is induced from the previous two. Then we get &lt;span class="math"&gt;\(h_2\)&lt;/span&gt; from &lt;span class="math"&gt;\(a_2\)&lt;/span&gt;, &lt;span class="math"&gt;\(h_1\)&lt;/span&gt;, and &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; and the second state &lt;span class="math"&gt;\(s_2\)&lt;/span&gt; from &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; and the process continues in that manner.&lt;/p&gt;
+&lt;p&gt;The &lt;span class="math"&gt;\(h_i\)&lt;/span&gt; values can be defined as a deterministic function &lt;span class="math"&gt;\(f\)&lt;/span&gt; of the other random variables. We can write
+&lt;/p&gt;
+&lt;div class="math"&gt;$${\bf h}_t = f\big({\bf o}_{t-1}, {\bf s}_{t-1}, {\bf a}_t, {\bf h}_{t-1}\big)$$&lt;/div&gt;
+&lt;p&gt;If we unroll this recursively, we get the function &lt;span class="math"&gt;\(g\)&lt;/span&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$${\bf h}_t =  f\big({\bf o}_{t-1}, {\bf s}_{t-1}, {\bf a}_t, f\big({\bf o}_{t-2}, {\bf s}_{t-2}, {\bf a}_{t-1}, \ldots f\big({\bf o}_0, {\bf s}_0, {\bf a}_1, {\bf h}_0\big)\big)\big) \triangleq g\big({\bf o}_{1:t-1}, {\bf s}_{1:t-1}, {\bf a}_{1:t}\big)$$&lt;/div&gt;
+&lt;p&gt;Where &lt;span class="math"&gt;\(o_0, s_0, h_0\)&lt;/span&gt; are treated as special initialization values and not part of the actual graphical model.&lt;/p&gt;
+&lt;p&gt;The joint distribution can be represented as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_\theta\big({\bf o}_{1:T}, {\bf s}_{1:T}, {\bf a}_{1:T}, {\bf h}_{1:T}\big) = \prod_{t=1}^T p_\theta\big({\bf o}_t \mid {\bf s}_t, {\bf h}_t\big) p_\theta\big({\bf s}_t \mid {\bf h}_{t}\big) p_\theta\big({\bf h}_t \mid {\bf o}_{t-1},  {\bf s}_{t-1}, {\bf a}_{t}, {\bf h}_{t-1} \big) p_\theta\big({\bf a}_t\big)$$&lt;/div&gt;
+&lt;p&gt;
+With
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_\theta\big({\bf h}_t \mid {\bf o}_{t-1},  {\bf s}_{t-1}, {\bf a}_{t}, {\bf h}_{t-1} \big) = \delta \big({\bf h}_t; f\big({\bf o}_{t-1}, {\bf s}_{t-1}, {\bf a}_t, {\bf h}_{t-1}\big) \big)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\delta \big(h_t; x \big)\)&lt;/span&gt; is the dirac delta which is &lt;span class="math"&gt;\(1\)&lt;/span&gt; at position &lt;span class="math"&gt;\(x\)&lt;/span&gt;, otherwise &lt;span class="math"&gt;\(0\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;To retrieve the joint distribution without the deterministic nodes, we can marginalize them out
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_\theta\big({\bf o}_{1:T}, {\bf s}_{1:T}, {\bf a}_{1:T}\big) = \int_{-\infty}^{\infty}\ldots\int_{-\infty}^{\infty}p_\theta\big({\bf o}_{1:T}, {\bf s}_{1:T}, {\bf a}_{1:T}, {\bf h}_{1:T}\big) d{\bf h}_1\ldots d{\bf h}_T =$$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \int \ldots\int  \prod_{t=1}^T p_\theta\big({\bf o}_t \mid {\bf s}_t, {\bf h}_t\big) p_\theta\big({\bf s}_t \mid {\bf h}_{t}\big) \delta \big({\bf h}_t; f\big({\bf o}_{t-1}, {\bf s}_{t-1}, {\bf a}_t, {\bf h}_{t-1}\big) \big) p_\theta\big({\bf a}_t\big) d{\bf h}_1\ldots d{\bf h}_T$$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \prod_{t=1}^T p_\theta\big({\bf o}_t \mid {\bf s}_t, g\big({\bf o}_{1:t-1}, {\bf s}_{1:t-1}, {\bf a}_{1:t}\big)\big) p_\theta\big({\bf s}_t \mid g\big({\bf o}_{1:t-1}, {\bf s}_{1:t-1}, {\bf a}_{1:t}\big)\big) p_\theta\big({\bf a}_t\big) =$$&lt;/div&gt;
+&lt;p&gt;As &lt;span class="math"&gt;\(g\)&lt;/span&gt; is deterministic, this is equivalent to
+&lt;/p&gt;
+&lt;div class="math"&gt;$$= \prod_{t=1}^T p_\theta\big({\bf o}_t \mid {\bf o}_{1:t-1}, {\bf s}_{1:t-1}, {\bf a}_{1:t}\big) p_\theta\big({\bf s}_t \mid {\bf s}_{1:t-1}, {\bf o}_{1:t-1},  {\bf a}_{1:t}\big) p_\theta\big({\bf a}_t\big)$$&lt;/div&gt;
+&lt;p&gt;
+This we can draw an equivalent graphical model without the deterministic nodes &lt;span class="math"&gt;\(h_t\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="vrnn-graphical-model-v2-no-h" src="https://gregorsemmler.github.io/images/model_learning/vrnn-graphical-model-v2-no-h.png"&gt;&lt;/p&gt;
+&lt;p&gt;Based on this simplified graph, we can retrieve the inference model&lt;/p&gt;
+&lt;div class="math"&gt;$$p_{\theta}\left({\bf s}_{1:T}\mid\mathbf{o}_{1:T},\mathbf{a}_{1:T}\right) = \prod_{t=1}^T p_\theta\big({\bf s}_t \mid {\bf s}_{1:t-1}, {\bf o}_{1:T},  {\bf a}_{1:t}\big) $$&lt;/div&gt;
+&lt;p&gt;
+No further simplifications can be made according to d-separation. &lt;/p&gt;
+&lt;p&gt;This can be approximated with 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T})=\prod_{t=1}^{T}q_{\phi}\bigl({\bf s}_{t}|{\bf o}_{t},{\bf h}_{t}\bigr) = \prod_{t=1}^{T}q_{\phi}\bigl({\bf s}_{t}|{\bf o}_{t},g\big({\bf o}_{1:t-1}, {\bf s}_{1:t-1}, {\bf a}_{1:t}\big)\bigr) =$$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \prod_{t=1}^{T}q_{\phi}\bigl({\bf s}_{t}|{\bf s}_{1:t-1}, {\bf o}_{1:t},  {\bf a}_{1:t}\bigr)$$&lt;/div&gt;
+&lt;p&gt;
+For the training, we can initially observe in the graphical model(s) that there are no conditional independence assumptions made. 
+So we would use the general VLB for VAEs for sequences as defined in a preceding section:&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{L}(\theta,\phi;{\bf o}_{1:T},{\bf a}_{1:T})= \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_\theta({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t},{\bf a}_{1:t})\big]} -$$&lt;/div&gt;
+&lt;div class="math"&gt;$$ - \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[D_{\mathrm{KL}}\big( q_\phi({\bf s}_t|{\bf s}_{1:t-1}, {\bf o}_{1:T},{\bf a}_{1:T})\parallel\ p_{\theta}({\bf s}_t|{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t})\big)\big]}$$&lt;/div&gt;
+&lt;p&gt;Using the previous approximation for &lt;span class="math"&gt;\(q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T})\)&lt;/span&gt; this becomes&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{L}(\theta,\phi;{\bf o}_{1:T},{\bf a}_{1:T})= \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_\theta({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t},{\bf a}_{1:t})\big]} -$$&lt;/div&gt;
+&lt;div class="math"&gt;$$ - \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[D_{\mathrm{KL}}\big( q_\phi({\bf s}_t|{\bf s}_{1:t-1}, {\bf o}_{1:t},{\bf a}_{1:t})\parallel\ p_{\theta}({\bf s}_t|{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t})\big)\big]}$$&lt;/div&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;In this article, we have looked at several variational auto-encoders for state space models in detail. All of them try to learn internal state representations of observations from an environment. This concludes this first series on model learning and state representation learning for model-based reinforcement learning. &lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] R. G. Krishnan, U. Shalit and D. Sontag. &lt;em&gt;Deep kalman filters&lt;/em&gt;. arXiv preprint arXiv:1511.05121. 2015&lt;/p&gt;
+&lt;p&gt;[2] M. Karl, et al. &lt;em&gt;Deep Variational Bayes Filters: Unsupervised Learning of State Space Models from Raw Data&lt;/em&gt;. arXiv preprint arXiv:1605.06432. 2017&lt;/p&gt;
+&lt;p&gt;[3] J. Chung, et al. &lt;em&gt;A recurrent latent variable model for sequential data&lt;/em&gt;. Advances in neural information processing systems, 28. 2015&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>State Space Models and Variational Inference</title><link href="https://gregorsemmler.github.io/state-space-models-and-variational-inference.html" rel="alternate"></link><published>2023-02-25T15:20:00+01:00</published><updated>2023-02-25T15:20:00+01:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2023-02-25:/state-space-models-and-variational-inference.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the last article we have looked at VAEs, how to train them and the concept of directed graphical models to represent relationships between random variables. Now we will look at state space models, an application of directed graphical models to portray sequences of random variables and how to …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the last article we have looked at VAEs, how to train them and the concept of directed graphical models to represent relationships between random variables. Now we will look at state space models, an application of directed graphical models to portray sequences of random variables and how to extend the principles of VAEs to them.&lt;/p&gt;
+&lt;h2&gt;State Space Models&lt;/h2&gt;
+&lt;p&gt;State space models (SSM) consists of several types of real-valued random variables. Here, we denote the hidden real-valued variables as &lt;span class="math"&gt;\(s_t\)&lt;/span&gt;, the input variables (action) as &lt;span class="math"&gt;\(a_t\)&lt;/span&gt;, and the output variables &lt;span class="math"&gt;\(o_t\)&lt;/span&gt; (which are the reconstructed observations) for each discrete-valued time step &lt;span class="math"&gt;\(t\)&lt;/span&gt;. 
+They can be represented as directed graphical models, where each node represents a random variable, and an edge represents a conditional dependency [1].&lt;/p&gt;
+&lt;h3&gt;Kalman Filter&lt;/h3&gt;
+&lt;p&gt;A special case are linear-gaussian SSMs [1], also known as linear dynamical systems. In this case, the transition and observation models are linear, with added Gaussian noise. In particular, the transition model has the form
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbf{s}_{t}=\mathbf{A}_{t}\mathbf{s}_{t-1}+\mathbf{B}_{t}\mathbf{a}_{t}+ {\mathcal{N}}(\mathbf{0},\mathbf{Q}_{t})$$&lt;/div&gt;
+&lt;p&gt;
+And the observation model has the form
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbf{o}_{t}=\mathbf{C}_{t}\mathbf{s}_{t}+\mathbf{D}_{t}\mathbf{a}_{t}+ {\mathcal{N}}(\mathbf{0},\mathbf{R}_{t})$$&lt;/div&gt;
+&lt;p&gt;
+Where &lt;span class="math"&gt;\(\mathbf{A_t, B_t, C_t, D_t, Q_t, R_t}\)&lt;/span&gt; are matrices of appropriate size. If they are independent of the time, the model is called &lt;strong&gt;stationary&lt;/strong&gt; and we can drop the time index &lt;span class="math"&gt;\(t\)&lt;/span&gt;.
+Often, we model the observations to only be dependent on the latent variables, so in this case the second equation simplifies to
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbf{o}_{t}=\mathbf{C}_{t}\mathbf{s}_{t} + {\mathcal{N}}(\mathbf{0},\mathbf{R}_{t})$$&lt;/div&gt;
+&lt;p&gt;
+Combined with a stationary model we get the transition model
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbf{s}_t =\mathbf{A} \mathbf{s}_{t-1}+\mathbf{B}\mathbf{a}_{t}+ {\mathcal{N}}(\mathbf{0},\mathbf{Q})$$&lt;/div&gt;
+&lt;p&gt;
+and observation model
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbf{o}_{t}=\mathbf{C} \mathbf{s}_{t} + {\mathcal{N}}(\mathbf{0},\mathbf{R})$$&lt;/div&gt;
+&lt;p&gt;We can represent this as a graphical model:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="ssm_example" src="https://gregorsemmler.github.io/images/model_learning/ssm_example.png"&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;strong&gt;kalman filter&lt;/strong&gt; allows to solve this exactly. We can predict the hidden state &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; based on the history of the previous observations &lt;span class="math"&gt;\(\mathbf{o_{1:t-1}}\)&lt;/span&gt; and actions &lt;span class="math"&gt;\(\mathbf{a_{1:t}}\)&lt;/span&gt; [1]. &lt;/p&gt;
+&lt;div class="math"&gt;$$p(\mathbf{s}_{t}|\mathbf{o_{1:t-1}},\mathbf{a_{1:t}}) = {\mathcal{N}}(s_{t}|\mu_{t},\Sigma_{t}) = \int_{-\infty}^{\infty} \mathcal{N}(\mathbf{s}_{t}|\mathbf{A}_{t}\mathbf{s}_{t-1}+\mathbf{B}_{t}\mathbf{a}_{t},\mathbf{Q}_{t})\mathcal{N}(\mathbf{s}_{t-1}|\mu_{t-1},\mathbf{\Sigma}_{t-1})d\mathbf{s}_{t-1}$$&lt;/div&gt;
+&lt;h2&gt;Variational Autoencoders for State Space Models&lt;/h2&gt;
+&lt;p&gt;The original VAE does not contain temporal information, so the encoder learns a latent representation where each data point is independent of its time index &lt;span class="math"&gt;\(t\)&lt;/span&gt;, so no transition information is contained. Several works have tried to extend the unsupervised representation learning to correlated temporal sequences in the years after [2-12].
+These approaches all vary in how they define the dependencies between the observed and latent variables and their generative and inference models. Recurrent neural networks are also used as part of the generative and inference models. 
+But all models use the basic VAE approach of an inference model and the maximization of a variational lower bound. They all also use continuous latent random variables and use discrete time steps of observed and latent random vectors. &lt;/p&gt;
+&lt;h3&gt;Learning&lt;/h3&gt;
+&lt;p&gt;We now consider models which handle the case where we have a sequence of observations &lt;span class="math"&gt;\(o_{1:T}\)&lt;/span&gt;, of latent variables (or states) &lt;span class="math"&gt;\(s_{1:T}\)&lt;/span&gt;, and (optionally) of actions &lt;span class="math"&gt;\(a_{1:T}\)&lt;/span&gt;. In general, we assume that the variables within those sequences are correlated with each other. 
+The structure of the dependencies of the variables is usually written as a product of conditional distributions using the chain rule. Here, the different orderings can be chosen which allows for different sampling processes and implementations. 
+Often it is assumed that the distribution of a variable at time &lt;span class="math"&gt;\(t\)&lt;/span&gt; only depends on other variables of time &lt;span class="math"&gt;\(t\)&lt;/span&gt; or earlier.&lt;/p&gt;
+&lt;p&gt;We usually assume that the actions are deterministic, so we are interested only interested in the distributions over the observations and latent variables. So, we can model the joint distribution of observations and latent variables, conditioned on the actions according to the chain rule, following the time steps &lt;span class="math"&gt;\(t\)&lt;/span&gt;, as [13]
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p({\bf o}_{1:T},{\bf s}_{1:T}\vert{\bf a}_{1:T})=\prod_{t=1}^{T}p({\bf o}_{t},{\bf s}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t}) =$$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \prod_{t=1}^{T}p({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t},{\bf a}_{1:t})p({\bf s}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t})$$&lt;/div&gt;
+&lt;p&gt;The implementation is done with a combination of feedforward neural networks and recurrent neural networks (RNNs). The latter are used to capture the aggregated previous data (for example the past states). How this works is that an internal state variable &lt;span class="math"&gt;\(h_t\)&lt;/span&gt; of the RNN is computed at each time step &lt;span class="math"&gt;\(t\)&lt;/span&gt;. We can denote such implementations by including &lt;em&gt;deterministic&lt;/em&gt; nodes in our graphical model for these state variables.&lt;/p&gt;
+&lt;p&gt;According to the chain rule, the posterior distribution of the hidden states can be written as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_{\theta}(\mathbf{s}_{1:T} | \mathbf{o}_{1:T},\mathbf{a}_{1:T})=\prod_{t=1}^{T}p_{\theta}(\mathbf{s}_{t}|\mathbf{s}_{1:t-1},\mathbf{o}_{1:T},\mathbf{a}_{1:T})$$&lt;/div&gt;
+&lt;p&gt;
+Depending on the conditional dependencies of the model, this can be simplified.&lt;/p&gt;
+&lt;p&gt;The VLB in this case can be derived analogously to the standard VAE case above. Combined with the above factorization, we arrive at &lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{L}(\theta,\phi;{\bf o}_{1:T},{\bf a}_{1:T})=\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_{\theta}({\bf o}_{1:T},{\bf s}_{1:T}|{\bf a}_{1:T}) - \log q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})\big] =
+$$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_\theta({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t},{\bf a}_{1:t})\big]} -$$&lt;/div&gt;
+&lt;div class="math"&gt;$$ - \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[D_{\mathrm{KL}}\big( q_\phi({\bf s}_t|{\bf s}_{1:t-1}, {\bf o}_{1:T},{\bf a}_{1:T})\parallel\ p_{\theta}({\bf s}_t|{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t})\big)\big]}$$&lt;/div&gt;
+&lt;p&gt;
+Again, the first addend can be interpreted as a construction error and the second as a regularization error. In contrast to a VAE, both terms are intractable and need to be estimated, for example with a Monte Carlo sampling approach.&lt;/p&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;We have now introduced the concept of state space models and derived the general loss function we can use for extended versions of a VAE, designed for state space models and sequences of random variables. In &lt;a href="https://gregorsemmler.github.io/variational-autoencoders-for-state-space-models.html"&gt;the next article&lt;/a&gt;, we will cover several examples of these in more detail.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] K. P. Murphy. &lt;em&gt;Machine learning: a probabilistic perspective&lt;/em&gt;. 2012&lt;/p&gt;
+&lt;p&gt;[2] J. Bayer and C. Osendorfer. &lt;em&gt;Learning Stochastic Recurrent Networks&lt;/em&gt;. ArXiv. 2014&lt;/p&gt;
+&lt;p&gt;[3] R. G. Krishnan, U. Shalit and D. Sontag. &lt;em&gt;Deep kalman filters&lt;/em&gt;. arXiv preprint arXiv:1511.05121. 2015&lt;/p&gt;
+&lt;p&gt;[4] J. Chung, et al. &lt;em&gt;A recurrent latent variable model for sequential data&lt;/em&gt;. Advances in neural information processing systems, 28. 2015&lt;/p&gt;
+&lt;p&gt;[5] M. Fraccaro, et al. &lt;em&gt;Sequential neural models with stochastic layers&lt;/em&gt;. Advances in neural information processing systems, 29. 2016&lt;/p&gt;
+&lt;p&gt;[6] R. Krishnan, U. Shalit and D. Sontag. &lt;em&gt;Structured Inference Networks for Nonlinear State Space Models&lt;/em&gt;. Proceedings of the AAAI Conference on Artificial Intelligence, 31. 2017&lt;/p&gt;
+&lt;p&gt;[7] M. Fraccaro, et al. &lt;em&gt;A Disentangled Recognition and Nonlinear Dynamics Model for Unsupervised Learning&lt;/em&gt;. Advances in neural information processing systems, 30. 3601-3610. 2017&lt;/p&gt;
+&lt;p&gt;[8] M. Karl, et al. &lt;em&gt;Deep Variational Bayes Filters: Unsupervised Learning of State Space Models from Raw Data&lt;/em&gt;. arXiv preprint arXiv:1605.06432. 2017&lt;/p&gt;
+&lt;p&gt;[9] A. Goyal, et al. &lt;em&gt;Z-Forcing: Training Stochastic Recurrent Networks&lt;/em&gt;. ArXiv. 2017&lt;/p&gt;
+&lt;p&gt;[10] W. Hsu, Y. Zhang and J. R. Glass. &lt;em&gt;Unsupervised Learning of Disentangled and Interpretable Representations from Sequential Data&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[11] Y. Li and S. Mandt. &lt;em&gt;Disentangled Sequential Autoencoder&lt;/em&gt;. 2018&lt;/p&gt;
+&lt;p&gt;[12] S. Leglaive, et al. &lt;em&gt;A Recurrent Variational Autoencoder for Speech Enhancement&lt;/em&gt;. ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP). 371-375. 2020&lt;/p&gt;
+&lt;p&gt;[13] L. Girin, et al. &lt;em&gt;Dynamical variational autoencoders: A comprehensive review&lt;/em&gt;. arXiv preprint arXiv:2008.12595. 2020&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>Variational Inference and Directed Graphical Models</title><link href="https://gregorsemmler.github.io/variational-inference-and-directed-graphical-models.html" rel="alternate"></link><published>2023-01-15T14:20:00+01:00</published><updated>2023-01-15T14:20:00+01:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2023-01-15:/variational-inference-and-directed-graphical-models.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Previously, we have looked at the general idea of learning a model. One way of learning a model and state representation is through variational inference. In the context of neural networks, the variational auto-encoder [1] is the most common way of doing this. Recall that a variational auto-encoder consists …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Previously, we have looked at the general idea of learning a model. One way of learning a model and state representation is through variational inference. In the context of neural networks, the variational auto-encoder [1] is the most common way of doing this. Recall that a variational auto-encoder consists of an encoder and a decoder, similar to a regular auto-encoder. In contrast though, the encoder maps to the parameters of a probability distribution, usually a multivariate normal distribution with diagonal covariance. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="vae_schema" src="https://gregorsemmler.github.io/images/model_learning/vae_schema.png"&gt;&lt;/p&gt;
+&lt;h2&gt;Learning for VAEs&lt;/h2&gt;
+&lt;p&gt;For our unsupervised learning of the dataset, we want to approximate the true distribution of the dataset &lt;span class="math"&gt;\(p^*(o)\)&lt;/span&gt; with that of our model &lt;span class="math"&gt;\(p_\theta(o)\)&lt;/span&gt;.
+The Kullback-Leibler (KL) divergence measures how different one probability distribution is from another.
+For two discrete probability distributions &lt;span class="math"&gt;\(p\)&lt;/span&gt; and &lt;span class="math"&gt;\(q\)&lt;/span&gt; of &lt;span class="math"&gt;\(x\)&lt;/span&gt; it is defined as 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$D_{\mathrm{KL}}(p\mid\mid q)=\sum_{x}p(x)\log\biggl({\frac{p(x)}{q(x)}}\biggr)$$&lt;/div&gt;
+&lt;p&gt; For two continuous distributions &lt;span class="math"&gt;\(p\)&lt;/span&gt; and &lt;span class="math"&gt;\(q\)&lt;/span&gt; of &lt;span class="math"&gt;\(x\)&lt;/span&gt; it is defined as 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$D_{\mathrm{KL}}(p\mid\mid q)=\int_{-\infty}^{\infty}p(x)\log\left(\frac{p(x)}{q(x)}\right)d x$$&lt;/div&gt;
+&lt;p&gt;We can also write
+&lt;/p&gt;
+&lt;div class="math"&gt;$$D_{\mathrm{KL}}(p\mid\mid q)=\mathbb{E}_{p(\mathrm{x})}\big[\log p(\mathrm{x})-\log q(\mathrm{x})\big]$$&lt;/div&gt;
+&lt;p&gt;So, we want to minimize the Kullback-Leibler (KL) divergence between these two distributions. This measurement is always greater or equal to &lt;span class="math"&gt;\(0\)&lt;/span&gt; and is &lt;span class="math"&gt;\(0\)&lt;/span&gt; if the true distributions are equal.&lt;/p&gt;
+&lt;p&gt;In our case we therefore want to minimize&lt;/p&gt;
+&lt;div class="math"&gt;$$\operatorname*{min}_{\theta}\left\{D_{\mathrm{KL}}(p^{\ast}(o)\parallel\ p_{\theta}(o))\right\}$$&lt;/div&gt;
+&lt;p&gt;which is equivalent to
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\operatorname*{max}_{\theta}\left\{\mathbb{E}_{p^{\ast}(o)}\big[\log p_{\theta}(o)\big]\right\}$$&lt;/div&gt;
+&lt;p&gt;
+By doing a few restatements we get
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\log p_{\theta}(\mathrm{o}) = \mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o) \big]= \mathbb{E}_{q_\phi(s|o)}\big[ \log\left(\frac{p_{\theta}(o,s)}{p_{\theta}(s|o)}\right)\big] = $$&lt;/div&gt;
+&lt;div class="math"&gt;$$=  \mathbb{E}_{q_\phi(s|o)}\big[\log q_\phi(s|o) +  \log p_{\theta}(o,s) - \log p_{\theta}(s|o) - \log q_\phi(s|o) \big] = $$&lt;/div&gt;
+&lt;div class="math"&gt;$$ = \mathbb{E}_{q_\phi(s|o)}\big[\log q_\phi(s|o) - \log p_{\theta}(s|o)\big] + \mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o,s)  - \log q_\phi(s|o) \big] = $$&lt;/div&gt;
+&lt;div class="math"&gt;$$ = D_{\mathrm{KL}}\big( q_\phi(s|o)\parallel\ p_{\theta}(s|o)\big) + \mathcal{L}(\theta,\phi;o) $$&lt;/div&gt;
+&lt;p&gt;
+Where &lt;span class="math"&gt;\(\mathcal{L}(\theta,\phi;o)\)&lt;/span&gt; is the so-called evidence lower bound (ELBO) or variational lower bound (VLB) or negative variational free energy for which holds&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{L}(\theta,\phi;o) = \mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o,s)  - \log q_\phi(s|o) \big]   \leq \log p_{\theta}(\mathrm{o})$$&lt;/div&gt;
+&lt;p&gt;Because, as mentioned above, for the KL divergence holds&lt;/p&gt;
+&lt;div class="math"&gt;$$D_{\mathrm{KL}}\big( q_\phi(s|o)\parallel\ p_{\theta}(s|o)\big) \geq 0$$&lt;/div&gt;
+&lt;p&gt;So, we can restate our earlier optimization problem as &lt;/p&gt;
+&lt;div class="math"&gt;$$\operatorname*{max}_{\theta}\left\{\mathcal{L}(\theta,\phi;o)\right\}$$&lt;/div&gt;
+&lt;p&gt;
+We can also rephrase the VLB in the form
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o,s)  - \log q_\phi(s|o) \big] = \mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o|s) + \log p_{\theta}(s)  - \log q_\phi(s|o) \big] = $$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o|s)\big] - \mathbb{E}_{q_\phi(s|o)}\big[\log q_\phi(s|o) - \log p_{\theta}(s) \big] = $$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \mathbb{E}_{q_\phi(s|o)}\big[\log p_{\theta}(o|s)\big] - D_{\mathrm{KL}}\big( q_\phi(s|o)\parallel\ p_{\theta}(s)\big) $$&lt;/div&gt;
+&lt;p&gt;
+Here, the first addend can be interpreted as a reconstruction error which captures the average accuracy of the whole pass through the encoder and then the decoder.  The second can be seen as a regularization error that keeps the approximate distribution &lt;span class="math"&gt;\(q_\phi(s|o)\)&lt;/span&gt; close to the prior distribution over the latent variables &lt;span class="math"&gt;\(p_{\theta}(s)\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;For a dataset of observations &lt;span class="math"&gt;\(\mathrm{O}\)&lt;/span&gt; of size &lt;span class="math"&gt;\(N\)&lt;/span&gt; the total VLB is the sum over all the datapoints &lt;span class="math"&gt;\(o_n\)&lt;/span&gt;&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{L}(\theta,\phi;\mathrm{O}) = \sum_{i=1}^{N} \mathbb{E}_{q_\phi(s_i|o_i)}\big[\log p_{\theta}(o_i,s_i)  - \log q_\phi(s_i|o_i) \big] = $$&lt;/div&gt;
+&lt;div class="math"&gt;$$= \sum_{i=1}^{N} \mathbb{E}_{q_\phi(s_i|o_i)}\big[\log p_{\theta}(o_i|s_i)\big] - \sum_{i=1}^{N}D_{\mathrm{KL}}\big( q_\phi(s_i|o_i)\parallel\ p_{\theta}(s_i)\big)$$&lt;/div&gt;
+&lt;p&gt; 
+However, calculating the expectation with respect to &lt;span class="math"&gt;\(q_\phi(s_i|o_i)\)&lt;/span&gt; is analytically intractable. One approach therefore is to approximate it using stochastic gradient descent using a Monte Carlo estimate of &lt;span class="math"&gt;\(L\)&lt;/span&gt; samples drawn i.i.d. from &lt;span class="math"&gt;\(q_\phi(s_i|o_i)\)&lt;/span&gt; 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{E}_{q_\phi(s_i|o_i)}\big[\log p_{\theta}(o_i|s_i)\big] \approx \frac{1}{L} \sum_{l=1}^{L}\log p_{\theta}(o_i|s_i)$$&lt;/div&gt;
+&lt;p&gt;
+We arrive at the approximate loss function
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\widetilde{\mathcal{L}}(\theta,\phi;\mathrm{O}) = \sum_{i=1}^{N} \frac{1}{L} \sum_{l=1}^{L}\log p_{\theta}(o_i|s_i) - \sum_{i=1}^{N}D_{\mathrm{KL}}\big( q_\phi(s_i|o_i)\parallel\ p_{\theta}(s_i)\big) \approx \mathcal{L}(\theta,\phi;\mathrm{O})$$&lt;/div&gt;
+&lt;p&gt;We want to extend the standard VAE to a case where we have sequences of random variables. To do this, we first want to introduce directed graphical models.&lt;/p&gt;
+&lt;h2&gt;Directed Graphical Models&lt;/h2&gt;
+&lt;p&gt;Let &lt;span class="math"&gt;\(X, Y, Z\)&lt;/span&gt; be three events. We say that &lt;span class="math"&gt;\(X\)&lt;/span&gt; and &lt;span class="math"&gt;\(Y\)&lt;/span&gt; are &lt;em&gt;conditionally independent&lt;/em&gt; of each other given &lt;span class="math"&gt;\(Z\)&lt;/span&gt;, if and only if &lt;span class="math"&gt;\(p(Z) &amp;gt; 0\)&lt;/span&gt; and
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(X,Y|Z)=p(X|Z)p(Y|Z)$$&lt;/div&gt;
+&lt;p&gt;
+Or equivalently
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(X|Y,Z)=p(X|Z)$$&lt;/div&gt;
+&lt;p&gt;
+We can also write this as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$X\perp Y|Z$$&lt;/div&gt;
+&lt;p&gt;We can analogously define the case in which &lt;span class="math"&gt;\(X, Y\)&lt;/span&gt; and &lt;span class="math"&gt;\(Z\)&lt;/span&gt; are random variables.&lt;/p&gt;
+&lt;p&gt;Now given a number of random variables we can represent the factorization of the joint distribution of all of them graphically with a &lt;em&gt;directed graphical model&lt;/em&gt; also known as a &lt;em&gt;bayesian network&lt;/em&gt;. Every node in the graph stands for a random variable and an edge for a conditional dependency. &lt;/p&gt;
+&lt;p&gt;A graph &lt;span class="math"&gt;\(G = (\mathcal{V},\mathcal{E})\)&lt;/span&gt; consists of a set of vertices &lt;span class="math"&gt;\(\mathcal{V}=\{1,\ldots,V\}\)&lt;/span&gt; and a set of edges &lt;span class="math"&gt;\(\mathcal{E} = \{(s,t)\::\:s,t\:\in\:\mathcal{V}\}\)&lt;/span&gt;. &lt;/p&gt;
+&lt;p&gt;A graph is called &lt;em&gt;undirected&lt;/em&gt; if for all &lt;span class="math"&gt;\(s,t \in \mathcal{V}\)&lt;/span&gt;: 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$(s,t) \in \mathcal E \Rightarrow (t,s) \in \mathcal E$$&lt;/div&gt;
+&lt;p&gt;
+In other words, in an undirected graph for all two nodes &lt;span class="math"&gt;\(s\)&lt;/span&gt; and &lt;span class="math"&gt;\(t\)&lt;/span&gt;, either there exists an edge both from &lt;span class="math"&gt;\(s\)&lt;/span&gt; to &lt;span class="math"&gt;\(t\)&lt;/span&gt; and also from &lt;span class="math"&gt;\(t\)&lt;/span&gt; to &lt;span class="math"&gt;\(s\)&lt;/span&gt;, or none. If a graph is not &lt;em&gt;undirected&lt;/em&gt;, it is called &lt;em&gt;directed&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;In a &lt;em&gt;directed graphical model&lt;/em&gt; the joint distribution over the vector &lt;span class="math"&gt;\({\mathbf x}_{1:N}\)&lt;/span&gt; of random variables can be represented as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p({\mathbf x}_{1:N})=\prod_{i=1}^{N}p(x_i|\mathrm{pa}(x_i))$$&lt;/div&gt;
+&lt;p&gt;
+Where &lt;span class="math"&gt;\(\mathrm{pa}(s)\triangleq{\big\{}t: (t,s) \in \mathcal{E}\big\}\)&lt;/span&gt; denote the &lt;em&gt;parents&lt;/em&gt; of &lt;span class="math"&gt;\(s \in \mathcal{V}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;In a directed graph we want to determine which nodes are conditionally independent of all other nodes. A set of nodes &lt;span class="math"&gt;\(A\)&lt;/span&gt; is &lt;strong&gt;d-separated&lt;/strong&gt; from another set of nodes &lt;span class="math"&gt;\(B\)&lt;/span&gt; given a observed set of nodes &lt;span class="math"&gt;\(C\)&lt;/span&gt; if and only if each undirected path from every node &lt;span class="math"&gt;\(a \in A\)&lt;/span&gt; to every node &lt;span class="math"&gt;\(b \in B\)&lt;/span&gt;  is d-separated by &lt;span class="math"&gt;\(C\)&lt;/span&gt;. An undirected path from &lt;span class="math"&gt;\(a\)&lt;/span&gt; to &lt;span class="math"&gt;\(b\)&lt;/span&gt; is d-separated given &lt;span class="math"&gt;\(C\)&lt;/span&gt; if and only if at least one of the following statements is true [2]:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;It contains a chain of the form &lt;span class="math"&gt;\(a\ \rightarrow\ c\ \rightarrow\ b\)&lt;/span&gt; or &lt;span class="math"&gt;\(a\ \leftarrow\ c\ \leftarrow\ b\)&lt;/span&gt;, for a node &lt;span class="math"&gt;\(c \in C\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;It contains a fork of the form &lt;span class="math"&gt;\(a\ \leftarrow\ c\ \rightarrow\ b\)&lt;/span&gt;, for a node &lt;span class="math"&gt;\(c \in C\)&lt;/span&gt;.&lt;/li&gt;
+&lt;li&gt;It contains a v-structure of the form &lt;span class="math"&gt;\(a\ \leftarrow\ d\ \rightarrow\ b\)&lt;/span&gt;, for a node &lt;span class="math"&gt;\(d \notin C\)&lt;/span&gt; where for all descendants &lt;span class="math"&gt;\(e\)&lt;/span&gt; of &lt;span class="math"&gt;\(d\)&lt;/span&gt; we also have &lt;span class="math"&gt;\(e \notin C\)&lt;/span&gt;. The descendants are all nodes than be reached from the node following directed paths in the graph (children, grand-children and so forth).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Consider this example of a simple graphical model with the random variables &lt;span class="math"&gt;\(D, E, F, G, H, I\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="simple_graphical_model_example" src="https://gregorsemmler.github.io/images/model_learning/simple_graphical_model_example.png"&gt;&lt;/p&gt;
+&lt;p&gt;According to the earlier formula we can express the joint distribution by following the topological ordering. Simply put, we begin at a node with no parents, then continue with another one without parents if the first node was to be removed. This is repeated until we have covered all nodes.&lt;/p&gt;
+&lt;div class="math"&gt;$$p(D,E,F,G,H,I)=p(D)p(E\vert D)p(G\vert D)p(F\vert E)p(H\vert E, G)p(I\vert E)$$&lt;/div&gt;
+&lt;p&gt;We can also observe that the node &lt;span class="math"&gt;\(E\)&lt;/span&gt; d-separates the nodes &lt;span class="math"&gt;\(D, G, H\)&lt;/span&gt; from the nodes &lt;span class="math"&gt;\(F, I\)&lt;/span&gt;. This means we can make the following conditional independence statements:&lt;/p&gt;
+&lt;div class="math"&gt;$$p(D,G,H \vert E, F, I) = p(D,G,H \vert E)$$&lt;/div&gt;
+&lt;div class="math"&gt;$$p(F, I \vert D, E, G, H) = p(F, I \vert E)$$&lt;/div&gt;
+&lt;div class="math"&gt;$$p(D, F, G, H, I \vert E) = p(D, G, H\vert E)p(F,I \vert E)$$&lt;/div&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;To wrap up, we looked at the basic principle of VAEs and the derivation of their loss function, including the ELBO. We also looked at directed graphical models and the concept of conditional independence. &lt;a href="https://gregorsemmler.github.io/state-space-models-and-variational-inference.html"&gt;Next up,&lt;/a&gt; we will look at state space models and how to extend the concept of a VAEs to sequences of random variables.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] D. P. Kingma and M. Welling. &lt;em&gt;Auto-Encoding Variational Bayes&lt;/em&gt;. arXiv preprint arXiv:1312.6114. 2013&lt;/p&gt;
+&lt;p&gt;[2] K. P. Murphy. &lt;em&gt;Machine learning: a probabilistic perspective&lt;/em&gt;. 2012&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>The difficulties in Model Learning and how to improve and evaluate</title><link href="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html" rel="alternate"></link><published>2022-12-10T14:17:00+01:00</published><updated>2022-12-10T14:17:00+01:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-12-10:/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the last article, we introduced the basic motivation and building blocks and motivation of model learning and state representation learning. We will now look at the main challenges, improvements and evaluation methods.&lt;/p&gt;
+&lt;h2&gt;Challenges&lt;/h2&gt;
+&lt;p&gt;There are several fundamental issues which need to be addressed when a model is learned …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In the last article, we introduced the basic motivation and building blocks and motivation of model learning and state representation learning. We will now look at the main challenges, improvements and evaluation methods.&lt;/p&gt;
+&lt;h2&gt;Challenges&lt;/h2&gt;
+&lt;p&gt;There are several fundamental issues which need to be addressed when a model is learned, namely stochasticity, uncertainty, partial observability, non-stationarity, and multi-step predictions [1].&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Stochasticity&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;If an agent navigates through an environment (or Markov Decision Processes) we can consider two different cases. If the same action taken in the same state always leads to the same next state and reward, we say the environment is &lt;em&gt;deterministic&lt;/em&gt;. If the next state and reward can change, we have a &lt;em&gt;stochastic&lt;/em&gt; environment. 
+If we want to learn a model in a stochastic environment, it is necessary to use descriptive models that can approximate the entire distribution of possible next states or generative models that can generate samples from the distribution. Descriptive models such as tabular models, Gaussian models [2], and Gaussian mixture models are feasible for small state spaces, but for high-dimensional state spaces, deep generative models such as variational inference models [3, 4] or generative adversarial networks are more successful.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Uncertainty&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In model-based learning, limited data can lead to uncertainty, which can be categorized into two types: epistemic uncertainty and aleatoric uncertainty (also known as stochasticity). Epistemic uncertainty can be decreased by gathering more data, while aleatoric uncertainty cannot be reduced. To ensure the reliability of predictions, we ideally should estimate both. Two statistical approaches to uncertainty estimation are frequentist and Bayesian. Bayesian methods, such as non-parametric Bayesian methods like Gaussian Processes [5], have been effective in model-based RL [2, 6], but they are not well-suited for high-dimensional state spaces. Recently, Bayesian techniques have been developed for approximating dynamics using neural networks, based on variational dropout [7] and variational inference [8]. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Partial Observability&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In MDPs, partial observability happens when the current observation does not supply complete information about the MDP's true state. Unlike stochasticity, which is a fundamental noise in state transitions and cannot be eliminated, partial observability stems from a lack of information in the current observation. It can be partly reduced by including information retrieved from past observations. This can be done in four main ways: windowing, belief states, recurrency, and external memory [1].&lt;/p&gt;
+&lt;p&gt;In the windowing approach several of the latest observations are merged and used as a state. This method increases the size of the states by a multiplicative factor, leading to high memory requirements. For high-dimensional observations this might therefore not be feasible and cannot benefit from generalization.&lt;/p&gt;
+&lt;p&gt;For belief states the learned dynamics model consists of an observation model &lt;span class="math"&gt;\(p(\mathrm{o_t} \vert \mathrm{s_t})\)&lt;/span&gt; and a latent transition model &lt;span class="math"&gt;\(p(\mathrm{s_{t+1}} \vert \mathrm{s_t}, a_t)\)&lt;/span&gt;, similar to state space models. [9]. We will consider state space models in more detail in the next article. Planning for such belief state models has been studied extensively, and the principles have also been combined with neural networks for high-dimensional problems.&lt;/p&gt;
+&lt;p&gt;In the case of recurrent neural networks (RNNs), most notably using long short-term memory (LSTM) [10] the transition parameters are shared between all time steps. This means the model size is independent of the history length, making it useful for gradient-based training and high-dimensional state spaces. [11, 12]&lt;/p&gt;
+&lt;p&gt;External memory [13] is useful for long-range dependencies, as we do not need to keep propagating information but can recall it once it becomes relevant. Neural Turing Machines (NTMs) [14] have read/write access to external memory and can be trained with gradient descent. &lt;/p&gt;
+&lt;p&gt;Ignoring partial observability can lead to a complete failure of the solution and should therefore be attended to. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Non-stationarity&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Non-stationarity describes the case where the reward and/or transition function change over time. In such situations, the agent's performance can decline if it continues to rely on its prior model without realizing the change. 
+To tackle non-stationarity, a prevalent method is to use multiple models that the agent can alternate between [15]. Various techniques can be employed to detect regime switches, such as observing prediction errors in reward and transition models [16]. Another approach is to meta-learn different policies [17, 18] or the optimizer [19].&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Multi-Step prediction&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;While one-step models can be utilized for multi-step predictions by repeatedly feeding the prediction back into the model, doing so may lead to errors accumulating and resulting in predictions that deviate from the true dynamics. To overcome this issue, two approaches have been identified: incorporating multi-step prediction losses into the overall training target via different loss functions [20] or learning a unique dynamics model for each n-step prediction [21]. In the end, relying solely on one-step prediction errors might not be a reliable way to gauge model performance in multi-step planning scenarios.&lt;/p&gt;
+&lt;h2&gt;Improvements&lt;/h2&gt;
+&lt;p&gt;Two ideas to improve the quality of the learned states is firstly to incorporate information about the reward and secondly to use alternative objective functions which model different ideas of how a good representation should look like.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Rewards&lt;/strong&gt;
+To improve the learned state representation, rewards can optionally be used as additional information. 
+One can learn a model which tries to predict the reward for a given state and action [22, 23], combined with a forward model or a value prediction, this helps to keep information in the learned representation that is useful to determine the reward. It can also be easier to just reconstruct rewards and / or values instead of full observations.
+We can also place constraints on the learned representations based on the rewards. A so called &lt;em&gt;casuality prior&lt;/em&gt; [24, 25] assumes that if we obtain two different rewards after performing the same action, then the states should be distanced from each other in the state space.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Alternative Objective functions&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;We can also add prior knowledge into the state representation learning process through different cost functions. This can range from laws of physics to things considered common sense [26, 24]. &lt;/p&gt;
+&lt;p&gt;Some examples are the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Slowness&lt;/strong&gt; assumes that interesting features change slowly through time and sudden changes are improbable [27, 28, 29, 30]. For example, we do not expect observed objects in a real-world scenario to randomly teleport to another position from one time step to another. To achieve this, we can minimize the expected squared distance between representations from consecutive time steps: &lt;div class="math"&gt;$$\mathcal{L}_S = \mathbb{E}\left[\parallel s_{t} - s_{t-1}\parallel^2\right]$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Proportionality&lt;/strong&gt; [24] hypothesizes that if the same action was performed at two different times &lt;span class="math"&gt;\(t_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(t_2\)&lt;/span&gt;, the representations must change by an equal amount, so assuming that &lt;span class="math"&gt;\(a_{t_1} = a_{t_2}\)&lt;/span&gt;, we  try to minimize the expected squared error between the changes in the representations: &lt;div class="math"&gt;$$\mathcal{L}_P = \mathbb{E}\left[ \left(\parallel s_{t_1} - s_{t_1-1}\parallel - \parallel s_{t_2} - s_{t_2-1}\parallel\right)^2\right]\hspace{0.5 cm}\mathrm{if} \hspace{3mm}a_{t_1} = a_{t_2}$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Variation&lt;/strong&gt; [30] posits that random observations of objects vary and therefore the internal representations ought to also vary. We know that &lt;span class="math"&gt;\(e^{-x}\)&lt;/span&gt; is &lt;span class="math"&gt;\(1\)&lt;/span&gt; for &lt;span class="math"&gt;\(x = 0\)&lt;/span&gt; and goes to &lt;span class="math"&gt;\(0\)&lt;/span&gt; for &lt;span class="math"&gt;\(x \rightarrow \infty\)&lt;/span&gt; so, for two states with indices &lt;span class="math"&gt;\(a\)&lt;/span&gt; and &lt;span class="math"&gt;\(b\)&lt;/span&gt; we can use the loss: &lt;div class="math"&gt;$$\mathcal{L}_V = \mathbb{E}\left[e^{-\parallel s_a - s_b\parallel}\right]$$&lt;/div&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Dynamic Verification&lt;/strong&gt; [31] consists of taking a sequence of state, action, next state triplets and trying to find an inserted incorrect corrupted observation &lt;span class="math"&gt;\(o\)&lt;/span&gt; which was retrieved from swapping it with an observation from a nearby time step.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Evaluation&lt;/h2&gt;
+&lt;p&gt;The most common form to evaluate the performance of learned representation is to examine how well reinforcement learning algorithms perform compared to other representations under the same algorithm. As the landscape of such algorithms is ever-increasing, this makes comparison between such learned state spaces cumbersome over time as continuous re-evaluation would be necessary. RL algorithms by their nature mostly also do not deliver a deterministic result for the same input [26].&lt;/p&gt;
+&lt;p&gt;Another approach is the disentanglement metric [32, 33] which is a measure of how well a representation separates the underlying factors of variation in the data.&lt;/p&gt;
+&lt;p&gt;KNN-MSE [25] computes the mean squared error over the k nearest neighbors in the learned state space. The nearest neighbors in the state space can then be compared with the corresponding nearest observation neighbors.&lt;/p&gt;
+&lt;p&gt;Distortion [34] measures how much the distance between an original (observation) space between specific points and a projected (representation) space changes. &lt;/p&gt;
+&lt;p&gt;Normalization Independent Embedding Quality Assessment [35] is a more complex metric to measure the quality of embeddings. It examines whether it preserves the global topology and whether it preserves the geometric structure of the local neighbor neighborhoods.&lt;/p&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;This concludes our look at the main challenges of model learning and state representation learning, improvements and evaluations. In the &lt;a href="https://gregorsemmler.github.io/variational-inference-and-directed-graphical-models.html"&gt;next article&lt;/a&gt; we will look at how we can use variational inference to learn states in an unsupervised manner.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] T. M. Moerland, et al. &lt;em&gt;Model-based Reinforcement Learning: A Survey&lt;/em&gt;. 2022&lt;/p&gt;
+&lt;p&gt;[2] M. P. Deisenroth and C. E. Rasmussen. &lt;em&gt;PILCO: A Model-Based and Data-Efficient Approach to Policy Search&lt;/em&gt;. Proceedings of the 28th International Conference on International Conference on Machine Learning. 465–472. 2011&lt;/p&gt;
+&lt;p&gt;[3] D. P. Kingma and M. Welling. &lt;em&gt;Auto-Encoding Variational Bayes&lt;/em&gt;. arXiv preprint arXiv:1312.6114. 2013&lt;/p&gt;
+&lt;p&gt;[4] R. G. Krishnan, U. Shalit and D. Sontag. &lt;em&gt;Deep kalman filters&lt;/em&gt;. arXiv preprint arXiv:1511.05121. 2015&lt;/p&gt;
+&lt;p&gt;[5] C. E. Rasmussen and C. K. Williams. &lt;em&gt;Gaussian processes for machine learning&lt;/em&gt;. 2006&lt;/p&gt;
+&lt;p&gt;[6] M. P. Deisenroth, D. Fox and C. E. Rasmussen. &lt;em&gt;Gaussian Processes for Data-Efficient Learning in Robotics and Control&lt;/em&gt;. IEEE Transactions on Pattern Analysis and Machine Intelligence, 37. 408-423. 2015&lt;/p&gt;
+&lt;p&gt;[7] R. McAllister and C. Rasmussen. &lt;em&gt;Improving PILCO with Bayesian Neural Network Dynamics Models&lt;/em&gt;. 2016&lt;/p&gt;
+&lt;p&gt;[8] L. Girin, et al. &lt;em&gt;Dynamical variational autoencoders: A comprehensive review&lt;/em&gt;. arXiv preprint arXiv:2008.12595. 2020&lt;/p&gt;
+&lt;p&gt;[9] K. P. Murphy. &lt;em&gt;Machine learning: a probabilistic perspective&lt;/em&gt;. 2012&lt;/p&gt;
+&lt;p&gt;[10] S. Hochreiter and J. Schmidhuber. &lt;em&gt;Long short-term memory&lt;/em&gt;. Neural Computation, 9. 1735-1780. 1997&lt;/p&gt;
+&lt;p&gt;[11] S. Chiappa, et al. &lt;em&gt;Recurrent Environment Simulators&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[12] D. Ha and J. Schmidhuber. &lt;em&gt;World Models&lt;/em&gt;. arXiv: Learning. 2018&lt;/p&gt;
+&lt;p&gt;[13] L. Peshkin, N. Meuleau and L. P. Kaelbling. &lt;em&gt;Learning Policies with External Memory&lt;/em&gt;. 1999&lt;/p&gt;
+&lt;p&gt;[14] A. Graves, G. Wayne and I. Danihelka. &lt;em&gt;Neural Turing Machines&lt;/em&gt;. 2014&lt;/p&gt;
+&lt;p&gt;[15] K. Doya, et al. &lt;em&gt;Multiple model-based reinforcement learning&lt;/em&gt;. Neural Computation, 14. 1347-1369. 2002&lt;/p&gt;
+&lt;p&gt;[16] B. C. Da Silva, et al. &lt;em&gt;Dealing with non-stationary environments using context detection&lt;/em&gt;. Proceedings of the 23rd international conference on Machine learning. 217–224. 2006&lt;/p&gt;
+&lt;p&gt;[17] C. Finn, P. Abbeel and S. Levine. &lt;em&gt;Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks&lt;/em&gt;. arXiv: Learning. 2017&lt;/p&gt;
+&lt;p&gt;[18] I. Clavera, et al. &lt;em&gt;Model-based reinforcement learning via meta-policy optimization&lt;/em&gt;. Conference on Robot Learning. 617–629. 2018&lt;/p&gt;
+&lt;p&gt;[19] A. Nagabandi, C. Finn and S. Levine. &lt;em&gt;Deep Online Learning via Meta-Learning: Continual Adaptation for Model-Based RL&lt;/em&gt;. 2018&lt;/p&gt;
+&lt;p&gt;[20] D. Hafner, et al. &lt;em&gt;Learning Latent Dynamics for Planning from Pixels&lt;/em&gt;. Proceedings of the 36th International Conference on Machine Learning. 2555-2565. 2019&lt;/p&gt;
+&lt;p&gt;[21] K. Asadi, et al. &lt;em&gt;Towards a Simple Approach to Multi-step Model-based Reinforcement Learning&lt;/em&gt;. arXiv: Learning. 2018&lt;/p&gt;
+&lt;p&gt;[22] J. Munk, J. Kober and R. Babuska. &lt;em&gt;Learning state representation for deep actor-critic control&lt;/em&gt;. 2016 IEEE 55th Conference on Decision and Control (CDC). 4667-4673. 2016&lt;/p&gt;
+&lt;p&gt;[23] J. Oh, S. Singh and H. Lee. &lt;em&gt;Value Prediction Network&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[24] R. Jonschkowski and O. Brock. &lt;em&gt;Learning state representations with robotic priors&lt;/em&gt;. Autonomous Robots, 39. 407-428. 2015&lt;/p&gt;
+&lt;p&gt;[25] T. Lesort, et al. &lt;em&gt;Unsupervised state representation learning with robotic priors: a robustness benchmark&lt;/em&gt;. arXiv preprint arXiv:1709.05185. 2017&lt;/p&gt;
+&lt;p&gt;[26] T. Lesort, et al. &lt;em&gt;State representation learning for control: An overview&lt;/em&gt;. Neural Networks, 108. 379–392. 2018&lt;/p&gt;
+&lt;p&gt;[27] L. Wiskott and T. J. Sejnowski. &lt;em&gt;Slow feature analysis: Unsupervised learning of invariances&lt;/em&gt;. Neural computation, 14. 715–770. 2002&lt;/p&gt;
+&lt;p&gt;[28] P. Song and C. Zhao. &lt;em&gt;Slow Down to Go Better: A Survey on Slow Feature Analysis&lt;/em&gt;. IEEE Transactions on Neural Networks and Learning Systems. 1-21. 2022&lt;/p&gt;
+&lt;p&gt;[29] V. R. Kompella, M. Luciw and J. Schmidhuber. &lt;em&gt;Incremental slow feature analysis: Adaptive low-complexity slow feature updating from high-dimensional input streams&lt;/em&gt;. Neural Computation, 24. 2994–3024. 2012&lt;/p&gt;
+&lt;p&gt;[30] R. Jonschkowski, et al. &lt;em&gt;PVEs: Position-Velocity Encoders for Unsupervised Learning of Structured State Representations&lt;/em&gt;. arXiv preprint arXiv:1705.09805. 2017&lt;/p&gt;
+&lt;p&gt;[31] E. Shelhamer, et al. &lt;em&gt;Loss is its own reward: Self-supervision for reinforcement learning&lt;/em&gt;. arXiv preprint arXiv:1612.07307. 2016&lt;/p&gt;
+&lt;p&gt;[32] I. Higgins, et al. &lt;em&gt;beta-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework&lt;/em&gt;. 2016&lt;/p&gt;
+&lt;p&gt;[33] M. Carbonneau, et al. &lt;em&gt;Measuring disentanglement: A review of metrics&lt;/em&gt;. IEEE Transactions on Neural Networks and Learning Systems. 2022&lt;/p&gt;
+&lt;p&gt;[34] P. Indyk. &lt;em&gt;Algorithmic applications of low-distortion geometric embeddings&lt;/em&gt;. Proceedings 42nd IEEE Symposium on Foundations of Computer Science. 10–33. 2001&lt;/p&gt;
+&lt;p&gt;[35] P. Zhang, Y. Ren and B. Zhang. &lt;em&gt;A new embedding quality assessment method for manifold learning&lt;/em&gt;. Neurocomputing, 97. 251–266. 2012&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>Model and State Representation Learning</title><link href="https://gregorsemmler.github.io/model-and-state-representation-learning.html" rel="alternate"></link><published>2022-11-28T10:30:00+01:00</published><updated>2022-11-28T10:30:00+01:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-11-28:/model-and-state-representation-learning.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;The availability of compact and informative representations of sensor data is essential for robotics control and artificial intelligence (AI). In the past, these representations were created manually, but now Deep Learning provides a framework for learning them from data. This is especially important for robotics because the high-dimensional data …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;The availability of compact and informative representations of sensor data is essential for robotics control and artificial intelligence (AI). In the past, these representations were created manually, but now Deep Learning provides a framework for learning them from data. This is especially important for robotics because the high-dimensional data from multiple sensors can be transformed into a much lower-dimensional state that contains only essential information for a particular task. Reinforcement learning algorithms use these low-dimensional states to learn controllers and take actions that maximize rewards.&lt;/p&gt;
+&lt;p&gt;However, finding and defining interesting states for control tasks often requires a considerable amount of manual engineering. Thus, the goal is to learn these features with as little supervision as possible. State representation learning (SRL) is a type of feature learning that focuses on transforming observations into states, which can then be used for efficient policy learning. SRL is often framed in a control setup that favors small dimensions for the state space, ideally with a semantic meaning that correlates with some physical feature. For example, a state might consist of the coordinates and the speed in each dimension of an object.&lt;/p&gt;
+&lt;p&gt;Learning in this context should be performed without explicit supervision, and the SRL literature may make use of knowledge about the physics of the world, interactions, and rewards whenever possible, serving as semi-supervision or self-supervision, which aids the challenge of learning state representations without explicit supervision. Building such models can exploit a large set of objectives or constraints, possibly taking inspiration from human learning. For example, infants expect objects to follow the principles of persistence, continuity, cohesion, and appearance-based attributes such as color and texture. &lt;/p&gt;
+&lt;p&gt;SRL is a critical technique for robotics control and AI that allows for the efficient learning of low-dimensional state representations from high-dimensional sensor data. By using information about actions, their consequences in the observation space, and rewards, along with generic constraints on what a good state representation should be, SRL can automate the feature learning process with minimal supervision.&lt;/p&gt;
+&lt;h2&gt;Benefits of Model-based Reinforcement Learning&lt;/h2&gt;
+&lt;p&gt;Why is a model needed at all to perform reinforcement learning? There are several motivations behind creating a model during the RL process. [1]&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Data Efficiency&lt;/strong&gt;
+After building a model an agent can plan in this model for a desired amount of time before acting in the environment. This allows to extract as much information as possible from a minimal number of training steps. In real world environments like robotics or autonomous driving, where performing steps is expensive this can lead to a massive increase in the data and sample efficiency. Especially if failure is expensive or even dangerous, when for example harm to humans is possible, this improvement is of great benefit.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Exploration&lt;/strong&gt;
+One of the fundamental challenges of RL is the question on how to balance exploration of rewarding unvisited states with the exploitation of the parts of the environment that are already known. If no model is available, then we have much more limited opportunities on how to design our exploration. The naivest approach here is &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt;-greedy exploration [2] where at each time step we pick one random possible action with a certain probability &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt;. In model-based approaches we have wide array of options instead. We can use different exploration strategies in planning compared to real environment steps. We can explore by following our current value estimates of states or by intrinsic motivation [3] where we define a metric on what makes a state interesting to explore, for example based on our uncertainty of the state or its novelty. We can also differ in how deep or how wide we explore the state space. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Transfer Learning&lt;/strong&gt;
+Learning a model of the environment enables us to transfer this model to a similar environment, where the dynamics or the reward function differ. It also allows us to transfer knowledge learned from simulated environments into real-world environment without having the cost or risks of having to learn from scratch in the real world.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Safety&lt;/strong&gt;
+Particularly for real-world applications, safety is extremely critical. A robot or a self-driving vehicle might destroy itself or other objects or hurt humans if no safeguards are in place. If we have an internal model of our surroundings and can propose estimates on which outcomes have which probability we can alleviate this. This can be done in diverse ways, for example by defining a safe region or having uncertainty estimates and verifying the safety of the current policy.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Explainability&lt;/strong&gt;
+With the rise of more powerful artificial intelligence, it becomes increasingly more crucial to be able to explain their internal workings and mitigate their black-box nature [4]. By learning of a model of the environment we can make it more understandable and interpretable to a human. For example, we can learn symbolic representations, interpretable transition models, or preference models. Or we can use visual explanations like attention or have textual descriptions. Alternatively, we can use as a basis of the model specific formulas restricting the model or use fuzzy controllers [5].&lt;/p&gt;
+&lt;h2&gt;Definitions&lt;/h2&gt;
+&lt;p&gt;We have an agent acting in an environment. At every time step &lt;span class="math"&gt;\(t\)&lt;/span&gt; the agent collects an observation &lt;span class="math"&gt;\(o_{t}\in{\mathcal{O}}\)&lt;/span&gt; through its sensors and takes an action &lt;span class="math"&gt;\(a_{t}\in{\mathcal{A}}\)&lt;/span&gt; where &lt;span class="math"&gt;\({\mathcal{O}}\)&lt;/span&gt; is the observation space and &lt;span class="math"&gt;\({\mathcal{A}}\)&lt;/span&gt; is either a discrete or continuous action space. This leads to a state transition from the current state to the next state.&lt;/p&gt;
+&lt;p&gt;In the reinforcement learning setting, the agent receives a reward &lt;span class="math"&gt;\(r_t\)&lt;/span&gt; defined by a reward function designed to steer the agent towards optimal behavior. &lt;/p&gt;
+&lt;p&gt;The goal of State Representation Learning (SRL) is to learn a representation &lt;span class="math"&gt;\(s_t \in \mathcal{S}\)&lt;/span&gt; where &lt;span class="math"&gt;\(\mathcal{S}\)&lt;/span&gt; is the representation state space. We learn a mapping &lt;span class="math"&gt;\(\phi\)&lt;/span&gt; from the history of observations &lt;span class="math"&gt;\(o_{1:t}\)&lt;/span&gt;, actions &lt;span class="math"&gt;\(a_{1:t}\)&lt;/span&gt;  and rewards &lt;span class="math"&gt;\(r_{1:t}\)&lt;/span&gt; until time step &lt;span class="math"&gt;\(t\)&lt;/span&gt; to the representation:&lt;/p&gt;
+&lt;div class="math"&gt;$$s_{t}{=}\phi(o_{1:t},a_{1:t},r_{1:t})$$&lt;/div&gt;
+&lt;p&gt;We are interested in the case where we don't have access to the true state and thus need to rely on unsupervised or self-supervised learning. This process often involves predicting a reconstruction of the observation, denoted by &lt;span class="math"&gt;\({\hat{o}}_{t}\)&lt;/span&gt;  and analogously we can reconstruct actions with &lt;span class="math"&gt;\({\hat{a}}_{t}\)&lt;/span&gt; and rewards with &lt;span class="math"&gt;\({\hat{r}}_{t}\)&lt;/span&gt;. &lt;/p&gt;
+&lt;h2&gt;Types of Models&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Forward Model&lt;/strong&gt;
+A forward model predicts the next state &lt;span class="math"&gt;\(s_{t+1}\)&lt;/span&gt; given a current state &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; and action &lt;span class="math"&gt;\(a_t\)&lt;/span&gt;. It is the most widely used model for lookahead planning. First, we encode the information from &lt;span class="math"&gt;\(o_t\)&lt;/span&gt; to &lt;span class="math"&gt;\(s_t\)&lt;/span&gt;, followed by generating a prediction for the next state &lt;span class="math"&gt;\(\hat{s}_{t+1}\)&lt;/span&gt;. We can also put constraints on it, such as linear dynamics between &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; and &lt;span class="math"&gt;\(s_{t+1}\)&lt;/span&gt;. The forward model equation can be represented as &lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{s}_{t+1} = m_f(s_t, a_t)$$&lt;/div&gt;
+&lt;p&gt;
+To learn the model, the error between the predicted state  &lt;span class="math"&gt;\(\hat{s}_{t+1}\)&lt;/span&gt; and the actual next state &lt;span class="math"&gt;\(s_{t+1}\)&lt;/span&gt; is backpropagated through both the transition and encoding models.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Inverse Model&lt;/strong&gt;
+Given a state &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; and a next state &lt;span class="math"&gt;\(s_{t+1}\)&lt;/span&gt;, (or observations &lt;span class="math"&gt;\(o_t\)&lt;/span&gt; and &lt;span class="math"&gt;\(o_{t+1}\)&lt;/span&gt;) the inverse model predicts which action &lt;span class="math"&gt;\(a_t\)&lt;/span&gt; would lead to the transition. 
+Again, we encode observations to receive the state representations, then predict the action: 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{a}_t = m_i(s_t, s_{t+1})$$&lt;/div&gt;
+&lt;p&gt;
+This way, the state can be designed to hold enough information to retrieve the action that caused the modification.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Backward Model&lt;/strong&gt;
+In a backward model, we predict which previous state &lt;span class="math"&gt;\(s_{t-1}\)&lt;/span&gt; and previous action &lt;span class="math"&gt;\(a_{t-1}\)&lt;/span&gt;  led to a given state &lt;span class="math"&gt;\(s_{t}\)&lt;/span&gt; (or observation &lt;span class="math"&gt;\(o_{t}\)&lt;/span&gt;)
+&lt;/p&gt;
+&lt;div class="math"&gt;$$(\hat{s}_{t-1}, \hat{a}_{t-1}) = m_b(s_{t})$$&lt;/div&gt;
+&lt;p&gt;
+This we way can plan in the backwards direction.&lt;/p&gt;
+&lt;h2&gt;Frequently Used Approaches&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Siamese networks&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Siamese networks [6] consist of multiple networks that are identical and share parameters, meaning that they have the same weights. The purpose of siamese architecture is not to categorize input data but to differentiate between inputs (for example, determining whether they belong to the same or different classes or conditions). This type of architecture is beneficial for imposing restrictions on the latent space of a neural network. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="siamese_schema" src="https://gregorsemmler.github.io/images/model_learning/siamese_schema.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Auto-encoders (AEs)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Auto-encoders consist of an encoder which maps the input into a latent space and a decoder which maps this latent representation back into the original input space. They are frequently utilized to acquire state representations and are widely employed for reducing the dimensionality of data. In our particular situation, we denote the input as &lt;span class="math"&gt;\(o_t\)&lt;/span&gt;  the latent representation as &lt;span class="math"&gt;\(s_t\)&lt;/span&gt;  and the reconstructed output as  &lt;span class="math"&gt;\({\hat{o}}_{t}\)&lt;/span&gt;  The dimension of the latent representation is determined by the dimension of the state representation we want to learn, and it can be constrained if necessary. The AE automatically learns a compact representation by minimizing the reconstruction error between input and output. The usual metric used to measure the reconstruction error is the mean squared error (MSE) between input and output, calculated pixel-wise, but other losses can also be employed. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="ae_schema" src="https://gregorsemmler.github.io/images/model_learning/ae_schema.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Denoising auto-encoders&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;A regular AE can be thought of as learning to compress and reconstruct an observation. Depending on the size and quality of the given dataset, a regular AE might find a solution that is too simple and does not generalize well.
+Denoising auto-encoders [7] [8] have the same basic structure and loss function as auto-encoders. Differently, in their training process random noise is added to each observation which needs to be removed in the reconstruction. This leads to a more robust encoder and decoder. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Variational auto-encoders (VAEs)&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;A variational auto-encoder [9] is an auto-encoder which maps the input to the parameters of a probability distribution of &lt;span class="math"&gt;\(o_t\)&lt;/span&gt;. This means we can interpret the encoder as distribution &lt;span class="math"&gt;\(p_\theta(s_{t}|o_{t})\)&lt;/span&gt; from which the states in &lt;span class="math"&gt;\(\mathcal{S}\)&lt;/span&gt; are sampled from, which we approximate with &lt;span class="math"&gt;\(q_{{\phi}}{\big(}s_{t}{\big|}o_{t}{\big)}\)&lt;/span&gt;, where &lt;span class="math"&gt;\(\phi\)&lt;/span&gt; are the parameters of the encoder. Similarly, the decoder represents the distribution &lt;span class="math"&gt;\(p_\theta(o_{t}|s_{t})\)&lt;/span&gt; and &lt;span class="math"&gt;\(\theta\)&lt;/span&gt; are the parameters of the decoder. Usually, the latent distribution is assumed to be a multivariate Gaussian with zero-mean and diagonal covariance: 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(s_t) = \mathcal{N}(\mathbf{s}_t;\mathbf{0},\mathbf{I})$$&lt;/div&gt;
+&lt;p&gt;There are two parts of the loss when training a VAE. Firstly, as in the regular AE, we have a reconstruction error (usually in the form of a mean-squared error). Secondly, there is a regularization error which tries to keep the latent distribution close to the prior distribution.&lt;/p&gt;
+&lt;p&gt;Once trained, VAEs can be used generate new data, by sampling from this latent distribution of &lt;span class="math"&gt;\(s_t\)&lt;/span&gt; and then decoding it.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="vae_schema" src="https://gregorsemmler.github.io/images/model_learning/vae_schema.png"&gt;&lt;/p&gt;
+&lt;p&gt;This basic version of the variational auto-encoder can be extended to versions which work on sequences of inputs, see for example  [10-21]. These approaches will be discussed in more detail in a future article.&lt;/p&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;This concludes a first overview over the motivation and the building blocks of model learning and state representation learning. In &lt;a href="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html"&gt;the next part&lt;/a&gt;, we will look at the core challenges, loss functions, and evaluation methods.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] T. M. Moerland, et al. &lt;em&gt;Model-based Reinforcement Learning: A Survey&lt;/em&gt;. 2022&lt;/p&gt;
+&lt;p&gt;[2] R. S. Sutton and A. G. Barto. &lt;em&gt;Reinforcement learning: An introduction&lt;/em&gt;. 2018&lt;/p&gt;
+&lt;p&gt;[3] N. Chentanez, A. G. Barto and S. Singh. &lt;em&gt;Intrinsically Motivated Reinforcement Learning&lt;/em&gt;. 2004&lt;/p&gt;
+&lt;p&gt;[4] G. Vilone and L. Longo. &lt;em&gt;Explainable artificial intelligence: a systematic review&lt;/em&gt;. arXiv preprint arXiv:2006.00093. 2020&lt;/p&gt;
+&lt;p&gt;[5] C. Glanois, et al. &lt;em&gt;A Survey on Interpretable Reinforcement Learning&lt;/em&gt;. arXiv preprint arXiv:2112.13112. 2021&lt;/p&gt;
+&lt;p&gt;[6] S. Chopra, R. Hadsell and Y. LeCun. &lt;em&gt;Learning a Similarity Metric Discriminatively, with Application to Face Verification&lt;/em&gt;. 2005 IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR'05), 1. 539-546. 2005&lt;/p&gt;
+&lt;p&gt;[7] P. Vincent, et al. &lt;em&gt;Extracting and composing robust features with denoising autoencoders&lt;/em&gt;. Proceedings of the 25th international conference on Machine learning - ICML '08. 1096-1103. 2008&lt;/p&gt;
+&lt;p&gt;[8] P. Vincent, et al. &lt;em&gt;Stacked denoising autoencoders: Learning useful representations in a deep network with a local denoising criterion&lt;/em&gt;. Journal of machine learning research, 11. 2010&lt;/p&gt;
+&lt;p&gt;[9] D. P. Kingma and M. Welling. &lt;em&gt;Auto-Encoding Variational Bayes&lt;/em&gt;. arXiv preprint arXiv:1312.6114. 2013&lt;/p&gt;
+&lt;p&gt;[10] M. Watter, et al. &lt;em&gt;Embed to Control: A Locally Linear Latent Dynamics Model for Control from Raw Images&lt;/em&gt;. arXiv: Learning. 2015&lt;/p&gt;
+&lt;p&gt;[11] J. Bayer and C. Osendorfer. &lt;em&gt;Learning Stochastic Recurrent Networks&lt;/em&gt;. ArXiv. 2014&lt;/p&gt;
+&lt;p&gt;[12] R. G. Krishnan, U. Shalit and D. Sontag. &lt;em&gt;Deep kalman filters&lt;/em&gt;. arXiv preprint arXiv:1511.05121. 2015&lt;/p&gt;
+&lt;p&gt;[13] J. Chung, et al. &lt;em&gt;A recurrent latent variable model for sequential data&lt;/em&gt;. Advances in neural information processing systems, 28. 2015&lt;/p&gt;
+&lt;p&gt;[14] M. Fraccaro, et al. &lt;em&gt;Sequential neural models with stochastic layers&lt;/em&gt;. Advances in neural information processing systems, 29. 2016&lt;/p&gt;
+&lt;p&gt;[15] R. Krishnan, U. Shalit and D. Sontag. &lt;em&gt;Structured Inference Networks for Nonlinear State Space Models&lt;/em&gt;. Proceedings of the AAAI Conference on Artificial Intelligence, 31. 2017&lt;/p&gt;
+&lt;p&gt;[16] M. Fraccaro, et al. &lt;em&gt;A Disentangled Recognition and Nonlinear Dynamics Model for Unsupervised Learning&lt;/em&gt;. Advances in neural information processing systems, 30. 3601-3610. 2017&lt;/p&gt;
+&lt;p&gt;[17] M. Karl, et al. &lt;em&gt;Deep Variational Bayes Filters: Unsupervised Learning of State Space Models from Raw Data&lt;/em&gt;. arXiv preprint arXiv:1605.06432. 2017&lt;/p&gt;
+&lt;p&gt;[18] A. Goyal, et al. &lt;em&gt;Z-Forcing: Training Stochastic Recurrent Networks&lt;/em&gt;. ArXiv. 2017&lt;/p&gt;
+&lt;p&gt;[19] W. Hsu, Y. Zhang and J. R. Glass. &lt;em&gt;Unsupervised Learning of Disentangled and Interpretable Representations from Sequential Data&lt;/em&gt;. 2017&lt;/p&gt;
+&lt;p&gt;[20] Y. Li and S. Mandt. &lt;em&gt;Disentangled Sequential Autoencoder&lt;/em&gt;. 2018&lt;/p&gt;
+&lt;p&gt;[21] S. Leglaive, et al. &lt;em&gt;A Recurrent Variational Autoencoder for Speech Enhancement&lt;/em&gt;. ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP). 371-375. 2020&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Entry"></category></entry><entry><title>Learning to pay attention</title><link href="https://gregorsemmler.github.io/learning-to-pay-attention.html" rel="alternate"></link><published>2022-10-20T16:18:00+02:00</published><updated>2022-10-20T16:18:00+02:00</updated><author><name>Gregor Semmler</name></author><id>tag:gregorsemmler.github.io,2022-10-20:/learning-to-pay-attention.html</id><summary type="html">&lt;p&gt;For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …&lt;/p&gt;</summary><content type="html">&lt;p&gt;For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks have achieved remarkable results in various applications in recent years. However, for a human observer it is mostly incomprehensible how the neural network has come to its conclusion, therefore not allowing deeper analysis of both correct and incorrect outputs. If we could teach a machine learning model to learn to pay attention to specific parts of an input image it would allow us to interpret which parts are deemed most important, leading to a more interpretable and explainable process.&lt;/p&gt;
 &lt;h2&gt;Attention&lt;/h2&gt;
-&lt;p&gt;For this, we can use scalar matrices which show the relative importance of specific parts of the image for the given task, so-called attention maps. For image classification, for example, the attention can determine the location of the object of interest. There are a different ways to implement attention, either as a trainable mechanism or as an analysis after the fact. &lt;/p&gt;
+&lt;p&gt;For this, we can use scalar matrices which show the relative importance of specific parts of the image for the given task, so-called attention maps. For image classification, for example, the attention can determine the location of the object of interest. There are different ways to implement attention, either as a trainable mechanism or as an analysis after the fact. &lt;/p&gt;
 &lt;p&gt;In this case we will look at a method by Jetley et al. [1] which includes attention estimators integrated into different points of the CNN architecture.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Attention mechanism" src="https://gregorsemmler.github.io/images/attention/attention_mechanism.png"&gt; (Image from [1])&lt;/p&gt;
 &lt;p&gt;The &lt;em&gt;local features&lt;/em&gt; refer to the outputs from a convolutional layer within the network, while the &lt;em&gt;global features&lt;/em&gt; refer to the outputs of the last layer before the final classification layer. The local features therefore have a receptive field for some local part of the image while the global features have the complete image has a receptive field. Each attention estimator has as input both local and global features.&lt;/p&gt;

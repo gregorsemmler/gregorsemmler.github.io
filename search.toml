@@ -3,6 +3,36 @@ base_directory = "output"
 html_selector = "main"
 
 [[input.files]]
+path = "state-of-the-art-model-based-reinforcement-learning.html"
+url = "/state-of-the-art-model-based-reinforcement-learning.html"
+title = "State of the art Model-based Reinforcement Learning"
+
+[[input.files]]
+path = "variational-autoencoders-for-state-space-models.html"
+url = "/variational-autoencoders-for-state-space-models.html"
+title = "Variational Autoencoders for State Space Models"
+
+[[input.files]]
+path = "state-space-models-and-variational-inference.html"
+url = "/state-space-models-and-variational-inference.html"
+title = "State Space Models and Variational Inference"
+
+[[input.files]]
+path = "variational-inference-and-directed-graphical-models.html"
+url = "/variational-inference-and-directed-graphical-models.html"
+title = "Variational Inference and Directed Graphical Models"
+
+[[input.files]]
+path = "the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html"
+url = "/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html"
+title = "The difficulties in Model Learning and how to improve and evaluate"
+
+[[input.files]]
+path = "model-and-state-representation-learning.html"
+url = "/model-and-state-representation-learning.html"
+title = "Model and State Representation Learning"
+
+[[input.files]]
 path = "learning-to-pay-attention.html"
 url = "/learning-to-pay-attention.html"
 title = "Learning to pay attention"

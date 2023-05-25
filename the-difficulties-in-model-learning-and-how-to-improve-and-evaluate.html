@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Gregor Semmler" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content=", Entry, " />
+
+<meta property="og:title" content="The difficulties in Model Learning and how to improve and evaluate "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html" />
+<meta property="og:description" content="Introduction In the last article, we introduced the basic motivation and building blocks and motivation of model learning and state representation learning. We will now look at the main challenges, improvements and evaluation methods. Challenges There are several fundamental issues which need to be addressed when a model is learned …" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Blog" />
+<meta property="og:article:author" content="Gregor Semmler" />
+<meta property="og:article:published_time" content="2022-12-10T14:17:00+01:00" />
+<meta name="twitter:title" content="The difficulties in Model Learning and how to improve and evaluate ">
+<meta name="twitter:description" content="Introduction In the last article, we introduced the basic motivation and building blocks and motivation of model learning and state representation learning. We will now look at the main challenges, improvements and evaluation methods. Challenges There are several fundamental issues which need to be addressed when a model is learned …">
+
+        <title>The difficulties in Model Learning and how to improve and evaluate  · Gregor Semmler&#39;s Blog
+</title>
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Blog - Full Atom Feed" />
+
+
+
+        <link rel="stylesheet" href="https://files.stork-search.net/basic.css" />
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Blog</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://gregorsemmler.github.io
+                                    >Home</a>
+                                </li>
+                                <!-- <li ><a href="https://gregorsemmler.github.io/categories">Categories</a></li> -->
+                                <!-- <li ><a href="https://gregorsemmler.github.io/tags">Tags</a></li> -->
+                                <li ><a href="https://gregorsemmler.github.io/archives">Archives</a></li>
+                                <!-- <li><form class="navbar-search" action="https://gregorsemmler.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li> -->
+                                <input class="navbar-search search-query" data-stork="sitesearch" type="text" placeholder="Search"/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div data-stork="sitesearch-output"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<main>
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html">
+                The difficulties in Model Learning and how to improve and evaluate
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h2>Introduction</h2>
+<p>In the last article, we introduced the basic motivation and building blocks and motivation of model learning and state representation learning. We will now look at the main challenges, improvements and evaluation methods.</p>
+<h2>Challenges</h2>
+<p>There are several fundamental issues which need to be addressed when a model is learned, namely stochasticity, uncertainty, partial observability, non-stationarity, and multi-step predictions [1].</p>
+<p><strong>Stochasticity</strong></p>
+<p>If an agent navigates through an environment (or Markov Decision Processes) we can consider two different cases. If the same action taken in the same state always leads to the same next state and reward, we say the environment is <em>deterministic</em>. If the next state and reward can change, we have a <em>stochastic</em> environment. 
+If we want to learn a model in a stochastic environment, it is necessary to use descriptive models that can approximate the entire distribution of possible next states or generative models that can generate samples from the distribution. Descriptive models such as tabular models, Gaussian models [2], and Gaussian mixture models are feasible for small state spaces, but for high-dimensional state spaces, deep generative models such as variational inference models [3, 4] or generative adversarial networks are more successful.</p>
+<p><strong>Uncertainty</strong></p>
+<p>In model-based learning, limited data can lead to uncertainty, which can be categorized into two types: epistemic uncertainty and aleatoric uncertainty (also known as stochasticity). Epistemic uncertainty can be decreased by gathering more data, while aleatoric uncertainty cannot be reduced. To ensure the reliability of predictions, we ideally should estimate both. Two statistical approaches to uncertainty estimation are frequentist and Bayesian. Bayesian methods, such as non-parametric Bayesian methods like Gaussian Processes [5], have been effective in model-based RL [2, 6], but they are not well-suited for high-dimensional state spaces. Recently, Bayesian techniques have been developed for approximating dynamics using neural networks, based on variational dropout [7] and variational inference [8]. </p>
+<p><strong>Partial Observability</strong></p>
+<p>In MDPs, partial observability happens when the current observation does not supply complete information about the MDP's true state. Unlike stochasticity, which is a fundamental noise in state transitions and cannot be eliminated, partial observability stems from a lack of information in the current observation. It can be partly reduced by including information retrieved from past observations. This can be done in four main ways: windowing, belief states, recurrency, and external memory [1].</p>
+<p>In the windowing approach several of the latest observations are merged and used as a state. This method increases the size of the states by a multiplicative factor, leading to high memory requirements. For high-dimensional observations this might therefore not be feasible and cannot benefit from generalization.</p>
+<p>For belief states the learned dynamics model consists of an observation model <span class="math">\(p(\mathrm{o_t} \vert \mathrm{s_t})\)</span> and a latent transition model <span class="math">\(p(\mathrm{s_{t+1}} \vert \mathrm{s_t}, a_t)\)</span>, similar to state space models. [9]. We will consider state space models in more detail in the next article. Planning for such belief state models has been studied extensively, and the principles have also been combined with neural networks for high-dimensional problems.</p>
+<p>In the case of recurrent neural networks (RNNs), most notably using long short-term memory (LSTM) [10] the transition parameters are shared between all time steps. This means the model size is independent of the history length, making it useful for gradient-based training and high-dimensional state spaces. [11, 12]</p>
+<p>External memory [13] is useful for long-range dependencies, as we do not need to keep propagating information but can recall it once it becomes relevant. Neural Turing Machines (NTMs) [14] have read/write access to external memory and can be trained with gradient descent. </p>
+<p>Ignoring partial observability can lead to a complete failure of the solution and should therefore be attended to. </p>
+<p><strong>Non-stationarity</strong></p>
+<p>Non-stationarity describes the case where the reward and/or transition function change over time. In such situations, the agent's performance can decline if it continues to rely on its prior model without realizing the change. 
+To tackle non-stationarity, a prevalent method is to use multiple models that the agent can alternate between [15]. Various techniques can be employed to detect regime switches, such as observing prediction errors in reward and transition models [16]. Another approach is to meta-learn different policies [17, 18] or the optimizer [19].</p>
+<p><strong>Multi-Step prediction</strong></p>
+<p>While one-step models can be utilized for multi-step predictions by repeatedly feeding the prediction back into the model, doing so may lead to errors accumulating and resulting in predictions that deviate from the true dynamics. To overcome this issue, two approaches have been identified: incorporating multi-step prediction losses into the overall training target via different loss functions [20] or learning a unique dynamics model for each n-step prediction [21]. In the end, relying solely on one-step prediction errors might not be a reliable way to gauge model performance in multi-step planning scenarios.</p>
+<h2>Improvements</h2>
+<p>Two ideas to improve the quality of the learned states is firstly to incorporate information about the reward and secondly to use alternative objective functions which model different ideas of how a good representation should look like.</p>
+<p><strong>Rewards</strong>
+To improve the learned state representation, rewards can optionally be used as additional information. 
+One can learn a model which tries to predict the reward for a given state and action [22, 23], combined with a forward model or a value prediction, this helps to keep information in the learned representation that is useful to determine the reward. It can also be easier to just reconstruct rewards and / or values instead of full observations.
+We can also place constraints on the learned representations based on the rewards. A so called <em>casuality prior</em> [24, 25] assumes that if we obtain two different rewards after performing the same action, then the states should be distanced from each other in the state space.</p>
+<p><strong>Alternative Objective functions</strong></p>
+<p>We can also add prior knowledge into the state representation learning process through different cost functions. This can range from laws of physics to things considered common sense [26, 24]. </p>
+<p>Some examples are the following:</p>
+<ul>
+<li><strong>Slowness</strong> assumes that interesting features change slowly through time and sudden changes are improbable [27, 28, 29, 30]. For example, we do not expect observed objects in a real-world scenario to randomly teleport to another position from one time step to another. To achieve this, we can minimize the expected squared distance between representations from consecutive time steps: <div class="math">$$\mathcal{L}_S = \mathbb{E}\left[\parallel s_{t} - s_{t-1}\parallel^2\right]$$</div>
+</li>
+<li><strong>Proportionality</strong> [24] hypothesizes that if the same action was performed at two different times <span class="math">\(t_1\)</span> and <span class="math">\(t_2\)</span>, the representations must change by an equal amount, so assuming that <span class="math">\(a_{t_1} = a_{t_2}\)</span>, we  try to minimize the expected squared error between the changes in the representations: <div class="math">$$\mathcal{L}_P = \mathbb{E}\left[ \left(\parallel s_{t_1} - s_{t_1-1}\parallel - \parallel s_{t_2} - s_{t_2-1}\parallel\right)^2\right]\hspace{0.5 cm}\mathrm{if} \hspace{3mm}a_{t_1} = a_{t_2}$$</div>
+</li>
+<li><strong>Variation</strong> [30] posits that random observations of objects vary and therefore the internal representations ought to also vary. We know that <span class="math">\(e^{-x}\)</span> is <span class="math">\(1\)</span> for <span class="math">\(x = 0\)</span> and goes to <span class="math">\(0\)</span> for <span class="math">\(x \rightarrow \infty\)</span> so, for two states with indices <span class="math">\(a\)</span> and <span class="math">\(b\)</span> we can use the loss: <div class="math">$$\mathcal{L}_V = \mathbb{E}\left[e^{-\parallel s_a - s_b\parallel}\right]$$</div>
+</li>
+<li><strong>Dynamic Verification</strong> [31] consists of taking a sequence of state, action, next state triplets and trying to find an inserted incorrect corrupted observation <span class="math">\(o\)</span> which was retrieved from swapping it with an observation from a nearby time step.</li>
+</ul>
+<h2>Evaluation</h2>
+<p>The most common form to evaluate the performance of learned representation is to examine how well reinforcement learning algorithms perform compared to other representations under the same algorithm. As the landscape of such algorithms is ever-increasing, this makes comparison between such learned state spaces cumbersome over time as continuous re-evaluation would be necessary. RL algorithms by their nature mostly also do not deliver a deterministic result for the same input [26].</p>
+<p>Another approach is the disentanglement metric [32, 33] which is a measure of how well a representation separates the underlying factors of variation in the data.</p>
+<p>KNN-MSE [25] computes the mean squared error over the k nearest neighbors in the learned state space. The nearest neighbors in the state space can then be compared with the corresponding nearest observation neighbors.</p>
+<p>Distortion [34] measures how much the distance between an original (observation) space between specific points and a projected (representation) space changes. </p>
+<p>Normalization Independent Embedding Quality Assessment [35] is a more complex metric to measure the quality of embeddings. It examines whether it preserves the global topology and whether it preserves the geometric structure of the local neighbor neighborhoods.</p>
+<h2>Summary</h2>
+<p>This concludes our look at the main challenges of model learning and state representation learning, improvements and evaluations. In the <a href="https://gregorsemmler.github.io/variational-inference-and-directed-graphical-models.html">next article</a> we will look at how we can use variational inference to learn states in an unsupervised manner.</p>
+<h2>References</h2>
+<p>[1] T. M. Moerland, et al. <em>Model-based Reinforcement Learning: A Survey</em>. 2022</p>
+<p>[2] M. P. Deisenroth and C. E. Rasmussen. <em>PILCO: A Model-Based and Data-Efficient Approach to Policy Search</em>. Proceedings of the 28th International Conference on International Conference on Machine Learning. 465–472. 2011</p>
+<p>[3] D. P. Kingma and M. Welling. <em>Auto-Encoding Variational Bayes</em>. arXiv preprint arXiv:1312.6114. 2013</p>
+<p>[4] R. G. Krishnan, U. Shalit and D. Sontag. <em>Deep kalman filters</em>. arXiv preprint arXiv:1511.05121. 2015</p>
+<p>[5] C. E. Rasmussen and C. K. Williams. <em>Gaussian processes for machine learning</em>. 2006</p>
+<p>[6] M. P. Deisenroth, D. Fox and C. E. Rasmussen. <em>Gaussian Processes for Data-Efficient Learning in Robotics and Control</em>. IEEE Transactions on Pattern Analysis and Machine Intelligence, 37. 408-423. 2015</p>
+<p>[7] R. McAllister and C. Rasmussen. <em>Improving PILCO with Bayesian Neural Network Dynamics Models</em>. 2016</p>
+<p>[8] L. Girin, et al. <em>Dynamical variational autoencoders: A comprehensive review</em>. arXiv preprint arXiv:2008.12595. 2020</p>
+<p>[9] K. P. Murphy. <em>Machine learning: a probabilistic perspective</em>. 2012</p>
+<p>[10] S. Hochreiter and J. Schmidhuber. <em>Long short-term memory</em>. Neural Computation, 9. 1735-1780. 1997</p>
+<p>[11] S. Chiappa, et al. <em>Recurrent Environment Simulators</em>. 2017</p>
+<p>[12] D. Ha and J. Schmidhuber. <em>World Models</em>. arXiv: Learning. 2018</p>
+<p>[13] L. Peshkin, N. Meuleau and L. P. Kaelbling. <em>Learning Policies with External Memory</em>. 1999</p>
+<p>[14] A. Graves, G. Wayne and I. Danihelka. <em>Neural Turing Machines</em>. 2014</p>
+<p>[15] K. Doya, et al. <em>Multiple model-based reinforcement learning</em>. Neural Computation, 14. 1347-1369. 2002</p>
+<p>[16] B. C. Da Silva, et al. <em>Dealing with non-stationary environments using context detection</em>. Proceedings of the 23rd international conference on Machine learning. 217–224. 2006</p>
+<p>[17] C. Finn, P. Abbeel and S. Levine. <em>Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks</em>. arXiv: Learning. 2017</p>
+<p>[18] I. Clavera, et al. <em>Model-based reinforcement learning via meta-policy optimization</em>. Conference on Robot Learning. 617–629. 2018</p>
+<p>[19] A. Nagabandi, C. Finn and S. Levine. <em>Deep Online Learning via Meta-Learning: Continual Adaptation for Model-Based RL</em>. 2018</p>
+<p>[20] D. Hafner, et al. <em>Learning Latent Dynamics for Planning from Pixels</em>. Proceedings of the 36th International Conference on Machine Learning. 2555-2565. 2019</p>
+<p>[21] K. Asadi, et al. <em>Towards a Simple Approach to Multi-step Model-based Reinforcement Learning</em>. arXiv: Learning. 2018</p>
+<p>[22] J. Munk, J. Kober and R. Babuska. <em>Learning state representation for deep actor-critic control</em>. 2016 IEEE 55th Conference on Decision and Control (CDC). 4667-4673. 2016</p>
+<p>[23] J. Oh, S. Singh and H. Lee. <em>Value Prediction Network</em>. 2017</p>
+<p>[24] R. Jonschkowski and O. Brock. <em>Learning state representations with robotic priors</em>. Autonomous Robots, 39. 407-428. 2015</p>
+<p>[25] T. Lesort, et al. <em>Unsupervised state representation learning with robotic priors: a robustness benchmark</em>. arXiv preprint arXiv:1709.05185. 2017</p>
+<p>[26] T. Lesort, et al. <em>State representation learning for control: An overview</em>. Neural Networks, 108. 379–392. 2018</p>
+<p>[27] L. Wiskott and T. J. Sejnowski. <em>Slow feature analysis: Unsupervised learning of invariances</em>. Neural computation, 14. 715–770. 2002</p>
+<p>[28] P. Song and C. Zhao. <em>Slow Down to Go Better: A Survey on Slow Feature Analysis</em>. IEEE Transactions on Neural Networks and Learning Systems. 1-21. 2022</p>
+<p>[29] V. R. Kompella, M. Luciw and J. Schmidhuber. <em>Incremental slow feature analysis: Adaptive low-complexity slow feature updating from high-dimensional input streams</em>. Neural Computation, 24. 2994–3024. 2012</p>
+<p>[30] R. Jonschkowski, et al. <em>PVEs: Position-Velocity Encoders for Unsupervised Learning of Structured State Representations</em>. arXiv preprint arXiv:1705.09805. 2017</p>
+<p>[31] E. Shelhamer, et al. <em>Loss is its own reward: Self-supervision for reinforcement learning</em>. arXiv preprint arXiv:1612.07307. 2016</p>
+<p>[32] I. Higgins, et al. <em>beta-VAE: Learning Basic Visual Concepts with a Constrained Variational Framework</em>. 2016</p>
+<p>[33] M. Carbonneau, et al. <em>Measuring disentanglement: A review of metrics</em>. IEEE Transactions on Neural Networks and Learning Systems. 2022</p>
+<p>[34] P. Indyk. <em>Algorithmic applications of low-distortion geometric embeddings</em>. Proceedings 42nd IEEE Symposium on Foundations of Computer Science. 10–33. 2001</p>
+<p>[35] P. Zhang, Y. Ren and B. Zhang. <em>A new embedding quality assessment method for manifold learning</em>. Neurocomputing, 97. 251–266. 2012</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+<section>
+    <h6 style="display:none;">Comments</h6>
+    <p id="comment-message"> </p>
+
+    <div class="accordion" id="accordion2">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
+                   data-toggle="collapse"
+                   data-parent="#accordion2"
+                   data-disqus-identifier="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html"
+                   href="https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html#comment_thread"
+                   id="comment-accordion-toggle">
+                    Comments
+                </a>
+            </div>
+            <div id="comment_thread" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <div class="comments">
+                        <div id="disqus_thread"></div>
+                        <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = 'https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html';
+    this.page.identifier = 'https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html';
+    };
+     */
+    var disqus_identifier = 'https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html';
+    var disqus_url = 'https://gregorsemmler.github.io/the-difficulties-in-model-learning-and-how-to-improve-and-evaluate.html';
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://gregor-s.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2022-12-10T14:17:00+01:00">Sa 10 Dezember 2022</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+</main>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://gregorsemmler.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        <script src="https://files.stork-search.net/releases/v1.5.0/stork.js"></script>
+        <script>
+            stork.register("sitesearch", "https://gregorsemmler.github.io/search-index.st")
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

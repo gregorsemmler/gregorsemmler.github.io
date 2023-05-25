@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://gregorsemmler.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Gregor Semmler" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content=", Entry, " />
+
+<meta property="og:title" content="State of the art Model-based Reinforcement Learning "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html" />
+<meta property="og:description" content="Introduction Deep reinforcement learning has shown its effectiveness in among other things, recent advances in game playing and robotics. For instance, machines can now learn to play games like Atari [1] and Go [2, 3] from scratch and reach superhuman performance. However, the data efficiency of learning from experience is …" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Blog" />
+<meta property="og:article:author" content="Gregor Semmler" />
+<meta property="og:article:published_time" content="2023-05-10T17:09:00+02:00" />
+<meta name="twitter:title" content="State of the art Model-based Reinforcement Learning ">
+<meta name="twitter:description" content="Introduction Deep reinforcement learning has shown its effectiveness in among other things, recent advances in game playing and robotics. For instance, machines can now learn to play games like Atari [1] and Go [2, 3] from scratch and reach superhuman performance. However, the data efficiency of learning from experience is …">
+
+        <title>State of the art Model-based Reinforcement Learning  · Gregor Semmler&#39;s Blog
+</title>
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Blog - Full Atom Feed" />
+
+
+
+        <link rel="stylesheet" href="https://files.stork-search.net/basic.css" />
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Blog</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://gregorsemmler.github.io
+                                    >Home</a>
+                                </li>
+                                <!-- <li ><a href="https://gregorsemmler.github.io/categories">Categories</a></li> -->
+                                <!-- <li ><a href="https://gregorsemmler.github.io/tags">Tags</a></li> -->
+                                <li ><a href="https://gregorsemmler.github.io/archives">Archives</a></li>
+                                <!-- <li><form class="navbar-search" action="https://gregorsemmler.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li> -->
+                                <input class="navbar-search search-query" data-stork="sitesearch" type="text" placeholder="Search"/>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div data-stork="sitesearch-output"></div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<main>
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html">
+                State of the art Model-based Reinforcement Learning
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h2>Introduction</h2>
+<p>Deep reinforcement learning has shown its effectiveness in among other things, recent advances in game playing and robotics. For instance, machines can now learn to play games like Atari [1] and Go [2, 3] from scratch and reach superhuman performance. However, the data efficiency of learning from experience is still a challenge, and research is focused on finding ways to speed up the learning process. One promising approach is to create an internal model of the environment, which can reduce the number of samples required to update the agent's behavior. </p>
+<p>The accuracy of a learned model is critical for the success of the model-based approach to reinforcement learning. However, the trade-off between accuracy and the number of samples needed is especially challenging in high-dimensional problems [4].</p>
+<p>In this article we will go over some of the state-of-the-art model-based reinforcement algorithms. We will look differentiate the approaches whether they perform explicit or implicit planning and whether the transitions are given or not [5]. </p>
+<h2>Explicit Planning on given Transitions</h2>
+<p>If we already know the exact transitions of the problems to be solved, we can program a simulation that we can use for planning. One example for this are board games.</p>
+<p><strong>AlphaZero</strong> and <strong>AlphaGo Zero</strong> [2, 3] are self-play curriculum learning programs developed to play complex board games such as Go, chess, and shogi. They use a single neural network with a value head and a policy head to learn the optimal policy and value functions. The loss is a sum of the policy loss and value loss. The planning algorithm is based on Monte Carlo Tree Search (MCTS) [6], and the residual network is used in the evaluation and selection of MCTS. The self-play mechanism starts from a randomly initialized resnet, and MCTS is used to play a tournament of games to generate training positions for the resnet to be added to a replay buffer from which the model is trained. AlphaZero is currently the strongest player in Go, chess, and shogi. </p>
+<p>An <em>example implementation</em> of the method can be found at <a href="https://github.com/gregorsemmler/alphazero">https://github.com/gregorsemmler/alphazero</a></p>
+<h2>Explicit Planning on learned Transitions</h2>
+<p>If the transitions are not given, we must learn the transition model at the same time as we then plan on it.</p>
+<p><strong>PILCO</strong> <strong>(Probabilistic Inference for Learning Control)</strong>  [7] is a method that approximates a transition model as a Gaussian Process [8] for smaller models. This approach is good for simple processes with good sample efficiency but needs more samples for high dimensional problems. PILCO treats the dynamics model as a probabilistic function and incorporates model uncertainty into long-term planning. The policy is improved based on analytically computed gradients. However, Gaussian Processes do not scale to high dimensional environments and are limited to smaller applications. PILCO has been used successfully for small problems like Mountain car and Cartpole pendulum swings.</p>
+<p><strong>PETS</strong> <strong>(Probabilistic Ensembles with Trajectory Sampling)</strong> [9] uses ensembles to handle both epistemic and aleatoric uncertainty. PETS combines a probabilistic deep network model with sampling-based uncertainty propagation to model the dynamics of the environment. The agent applies the first action from the optimal sequence determined by the cross-entropy method (CEM) [10, 11] and re-plans at every time-step using model-predictive control (MPC) [12]. The method is tested on simulated robot tasks such as Half-Cheetah, Pusher, and Reacher, and it is reported to approach asymptotic model-free baselines, demonstrating the importance of uncertainty estimation in model-based reinforcement learning.</p>
+<p>An <em>example implementation</em> of the method can be found at <a href="https://github.com/gregorsemmler/pets">https://github.com/gregorsemmler/pets</a>. See also <a href="https://gregorsemmler.github.io/how-a-robot-can-learn-to-drive-in-less-than-ten-trials.html">this article</a> in which it is demonstrated on how to apply this method to a real-life robot to learn how to drive in less than ten trials.</p>
+<p><strong>Visual Foresight</strong> [13, 14] is a method that aims to generalize deep learning methods to never-before-seen tasks and objects, allowing robots to learn complex manipulation skills from high-dimensional raw sensory pixel inputs. This approach combines deep action-conditioned video prediction models with model-predictive control (MPC) [12] and uses entirely unlabeled training data, eliminating the need for human supervision. It uses a training procedure where data is sampled according to a probability distribution, while a video prediction model is trained with the samples. The approach does not require a calibrated camera, an instrumented training set-up, nor precise sensing and actuation. At test time, three distinct goal specification methods are explored: designated pixels, goal images, and image classifiers. The actions are selected according to MPC. The results demonstrate that the method can generalize to never-before-seen objects—both rigid and deformable—and solve a range of user-defined object manipulation tasks using the same model and can perform multi-object manipulation, pushing, picking, and placing, and cloth-folding tasks.</p>
+<h3>Hybrid Model-Free / Model-Based Imagination</h3>
+<p>We can also combine model-free and model-based methods in our approach.</p>
+<p><strong>MB-MPO</strong> <strong>(Model-based Reinforcement Learning via Meta-Policy Optimization)</strong> [15] Model-based reinforcement learning approaches aim to be data efficient but struggle to achieve the same asymptotic performance as model-free methods due to challenges in learning dynamics models that match the real-world dynamics. To address this, MB-MPO is proposed as an approach that meta-learns a policy using an ensemble of learned dynamic models, enabling quick adaptation to any model in the ensemble with one policy gradient step. MB-MPO builds on the MAML [16] meta-learning framework and is evaluated on continuous control benchmark tasks in a robotics simulator, where it shows more robustness to model imperfections and approaches the performance of model-free methods with significantly less experience. The planning part of the algorithm samples imagined trajectories.</p>
+<p><strong>MBPO</strong> <strong>(Model-based Policy Optimization)</strong> [17] is a method with a guarantee of monotonic improvement at each step. The empirical estimate of model generalization can be incorporated into the analysis to justify model usage. Using short model-generated rollouts combined with real data, MBPO achieves the benefits of more complicated model-based algorithms without the usual pitfalls. The approach surpasses the sample efficiency of prior model-based methods, matches the asymptotic performance of the best model-free algorithms, and scales to horizons that cause other model-based methods to fail entirely. The approach uses an ensemble of probabilistic networks, similar to PETS, [9] and employs Soft-actor-critic [18] as the reinforcement learning method. Experiments on simulated robotics tasks, including Hopper, Walker, Half-Cheetah, and Ant, demonstrate that the policy optimization algorithm learns substantially faster with short rollouts than other algorithms while retaining asymptotic performance relative to model-free algorithms.</p>
+<h2>Latent Models</h2>
+<p>Latent models substitute the single transition model with several models based on deep neural networks for the different parts of the algorithm. Here we can have models for transitions, rewards, observations and representations [5].</p>
+<p>The <strong>Value Prediction Network (VPN)</strong> [19] approach integrates both model-free and model-based reinforcement learning methods into a single neural network. It learns a dynamics model that predicts future values instead of future observations. VPN combines temporal-difference search and n-step Q-learning [20] for training and performs lookahead planning to choose actions. The VPN architecture consists of four modules: encoding, transition, outcome, and value. It uses imagination to update the policy and performs planning up to a planning horizon using a simple rollout algorithm. Experimental results show that VPN outperforms both model-free and model-based baselines in a stochastic environment where building an accurate observation-prediction model is difficult. It also outperforms Deep Q-Network (DQN) [1] on several Atari games.</p>
+<p><strong>Simulated policy learning (SimPLe)</strong> [21] is a method of model-based reinforcement learning that uses stochastic video prediction techniques to predict future frames of a video. It combines model-free work on video prediction using variational auto-encoders, recurrent world models, and generative models with model-based work. SimPLe uses a variational auto-encoder to create a latent model that can deal with limited observation frames. The policy optimization is done using the model-free PPO [22] algorithm. In experiments, SimPLe has been found to be more sample efficient than the Rainbow [23] algorithm on 26 Atari games when learning with 100,000 sample steps.</p>
+<p><strong>Deep Planning Network (PlaNet)</strong> [24] is an agent that learns to interact with the environment by learning its dynamics from images and planning its actions in a hidden space. To improve its performance, PlaNet uses a model with both deterministic and stochastic transitions, along with a multi-step variational inference objective called latent overshooting. PlaNet uses a Recurrent State Space Model (RSSM) [25] with a transition model, observation model, variational encoder, and reward model. It adapts its plan using a Model-Predictive Control agent and replans each step using the Cross-Entropy-Method (CEM) to find the best action sequence. PlaNet does not use a policy or value network. Despite using only pixel observations, it solves complex tasks such as continuous control with contact dynamics, partial observability, and sparse rewards, outperforming model-free algorithms with fewer episodes and reaching final performance similar or higher than model-free algorithms. </p>
+<p><strong>Dreamer</strong> [26] is a reinforcement learning agent building on PlaNet [24] that solves long-horizon tasks from images through imagination. It uses world models that predict actions and values and enable interpolating between past experiences. Dreamer's latent models include a representation model, an observation model, a transition model, and a reward model that allow it to plan potential action sequences without executing them in the environment. It does this using an actor-critic approach, which involves both learning a policy (the actor) for selecting actions and estimating the value of states or actions (the critic) to guide the learning process. By taking future rewards into account, Dreamer can learn to make decisions that lead to better long-term outcomes. Dreamer backpropagates through the value model to learn behaviors that consider rewards beyond the horizon. It achieves high performance on 20 visual control tasks from the DeepMind control suite, exceeding existing approaches in data-efficiency, computation time, and final performance.</p>
+<p><strong>Plan2Explore</strong> [27] is a type of agent that uses a technique called self-supervised reinforcement learning to overcome the challenges of learning specific tasks and making the most of the samples. This agent explores and adapts to new tasks without prior knowledge during exploration, which helps it operate more efficiently. Unlike other methods that evaluate observations for novelty after the agent has already reached them, Plan2Explore uses planning to identify anticipated future novelty during exploration. After exploration, the agent quickly adapts to different tasks, using zero-shot [28] learning. Plan2Explore learns about the world it operates in through unsupervised exploration and uses this knowledge to solve zero-shot and few-shot tasks. Plan2Explore is built on PlaNet [24] and Dreamer [26] learning dynamics models and uses similar latent models such as an image encoder, dynamics, reward predictor, and image decoder. Plan2Explore showed impressive performance in zero-shot learning on the DeepMind Control Suite, matching Dreamer's supervised reinforcement learning performance without task-specific interaction or training supervision. It outperforms prior self-supervised exploration methods and almost matches the performance of an oracle that has access to rewards.</p>
+<h2>End-to-End Planning / Transitions with Latent Models</h2>
+<p><strong>Imagination-Augmented Agents (I2A)</strong> [29, 30, 31] is an advanced deep reinforcement learning architecture that enhances data efficiency, performance, and robustness compared to many other methods. Instead of specifying how a model should be used to reach a policy, I2A leverage a learned environment model to create implicit plans in deep policy networks.</p>
+<p>To deal with imperfections that may arise from model-based algorithms, the I2A algorithm introduces a latent model, which is trained without supervision from agent trajectories and utilizes a recurrent architecture with a CNN. The essential components of the I2A architecture are a plan-construction manager, an action policy creator controller, an environment model for imagination, and a memory. I2A employs a manager or meta-controller that decides between executing actions in the environment or imagination, even when the model crudely captures the environmental dynamics.</p>
+<p>The I2A architecture has been successfully deployed in Sokoban and MiniPacman, achieving excellent performance with minimal data and imperfect models. Pascanu et al. [30] applied the I2A approach to a maze and spaceship task, demonstrating that I2A surpasses model-free and planning algorithms (MCTS).</p>
+<p><strong>World Models</strong> [32] are recurrent neural networks that generate states for simulation in an unsupervised manner. These models learn a compressed representation of the environment's spatial and temporal aspects. The resulting features can be used to train a simple and compact policy that solves tasks, with planning taking place in the simplified world. The controller model maps directly to actions, while the World Models architecture includes a vision model, a memory model, and a controller. Typically, the vision model is trained with a variational auto-encoder in an unsupervised manner, and the memory model is approximated using a mixture density network of a Gaussian distribution (MDN-RNN). Dreams or rollouts in World Models are distinguished from real environment samples. One of the benefits of World Models is that a policy can be trained entirely within the dream, using imagination only, and then transferred to the actual environment. VizDoom tasks such as Car Racing have been experimentally explored using World Models.</p>
+<p>Developing agents with planning capabilities has been a challenge for artificial intelligence researchers. Although tree-based planning methods have been effective in domains like chess and Go where a perfect simulator exists, the dynamics of real-world environments are often intricate and obscure. 
+However, the <strong>MuZero</strong> [33] algorithm, which combines a learned model with a tree-based search, has achieved superhuman performance in challenging and visually complex domains without any prior knowledge of their underlying dynamics. The algorithm iteratively applies a learned model to predict the reward, action-selection policy, and value function. Unlike AlphaZero [3], which had access to the game rules, MuZero matched AlphaZero's superhuman performance on Go, chess, and shogi without any prior knowledge of the game rules. MuZero utilizes an architecture with distinct modules, such as representation, dynamics, and prediction functions. The dynamics function is a recurrent process that calculates transition and reward, while the prediction function computes policy and value functions. For planning, MuZero uses a variant of MCTS without rollouts and with P-UCT as a selection rule. It performs well on Atari games and board games, learning to play the games from scratch after learning the rules from the environment. </p>
+<h2>Summary</h2>
+<p>In this article we have looked at several state-of-the-art model-based reinforcement learning algorithms, differentiating between explicit or implicit planning, and given or learned transitions are given and end-to-end planning approaches.</p>
+<h2>References</h2>
+<p>[1] V. Mnih, et al. <em>Playing Atari with Deep Reinforcement Learning</em>. arXiv preprint arXiv:1312.5602. 2013</p>
+<p>[2] D. Silver, et al. <em>Mastering the game of Go without human knowledge</em>. Nature, 550. 354-359. 2017</p>
+<p>[3] D. Silver, et al. <em>A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play.</em>. Science, 362. 1140-1144. 2018</p>
+<p>[4] A. Plaat, W. Kosters and M. Preuss. <em>High-accuracy model-based reinforcement learning, a survey</em>. arXiv preprint arXiv:2107.08241. 2021</p>
+<p>[5] A. Plaat, W. Kosters and M. Preuss. <em>Model-based deep reinforcement learning for high-dimensional problems, a survey</em>. arXiv preprint arXiv:2008.05598. 2020</p>
+<p>[6] C. Browne, et al. <em>A Survey of Monte Carlo Tree Search Methods</em>. IEEE Transactions on Computational Intelligence and AI in Games, 4. 1-43. 2012</p>
+<p>[7] M. P. Deisenroth and C. E. Rasmussen. <em>PILCO: A Model-Based and Data-Efficient Approach to Policy Search</em>. Proceedings of the 28th International Conference on International Conference on Machine Learning. 465–472. 2011</p>
+<p>[8] C. E. Rasmussen and C. K. Williams. <em>Gaussian processes for machine learning</em>. 2006</p>
+<p>[9] K. Chua, et al. <em>Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models</em>. 2018</p>
+<p>[10] R. Rubinstein. <em>The cross-entropy method for combinatorial and continuous optimization</em>. Methodology and computing in applied probability, 1. 127–190. 1999</p>
+<p>[11] C. Pinneri, et al. <em>Sample-efficient cross-entropy method for real-time planning</em>. Conference on Robot Learning. 1049–1065. 2021</p>
+<p>[12] E. F. Camacho and C. B. Alba. <em>Model predictive control</em>. 2013</p>
+<p>[13] C. Finn and S. Levine. <em>Deep Visual Foresight for Planning Robot Motion</em>. arXiv: Learning. 2016</p>
+<p>[14] F. Ebert, et al. <em>Visual Foresight: Model-Based Deep Reinforcement Learning for Vision-Based Robotic Control.</em>. arXiv: Robotics. 2018</p>
+<p>[15] I. Clavera, et al. <em>Model-based reinforcement learning via meta-policy optimization</em>. Conference on Robot Learning. 617–629. 2018</p>
+<p>[16] C. Finn, P. Abbeel and S. Levine. <em>Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks</em>. arXiv: Learning. 2017</p>
+<p>[17] M. Janner, et al. <em>When to Trust Your Model: Model-Based Policy Optimization</em>. 2019</p>
+<p>[18] T. Haarnoja, et al. <em>Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor</em>. arXiv: Learning. 2018</p>
+<p>[19] J. Oh, S. Singh and H. Lee. <em>Value Prediction Network</em>. 2017</p>
+<p>[20] C. Watkins. <em>Learning from delayed rewards</em>. 1989</p>
+<p>[21] L. Kaiser, et al. <em>Model-Based Reinforcement Learning for Atari</em>. arXiv: Learning. 2019</p>
+<p>[22] J. Schulman, et al. <em>Proximal Policy Optimization Algorithms</em>. arXiv: Learning. 2017</p>
+<p>[23] M. Hessel, et al. <em>Rainbow: Combining Improvements in Deep Reinforcement Learning</em>. 2017</p>
+<p>[24] D. Hafner, et al. <em>Learning Latent Dynamics for Planning from Pixels</em>. Proceedings of the 36th International Conference on Machine Learning. 2555-2565. 2019</p>
+<p>[25] J. Chung, et al. <em>A recurrent latent variable model for sequential data</em>. Advances in neural information processing systems, 28. 2015</p>
+<p>[26] D. Hafner, et al. <em>Dream to Control: Learning Behaviors by Latent Imagination</em>. arXiv preprint arXiv:1912.01603. 2019</p>
+<p>[27] R. Sekar, et al. <em>Planning to Explore via Self-Supervised World Models</em>. International Conference on Machine Learning. 8583–8592. 2020</p>
+<p>[28] W. Wang, et al. <em>A Survey of Zero-Shot Learning: Settings, Methods, and Applications</em>. ACM Transactions on Intelligent Systems and Technology, 10. 1-37. 2019</p>
+<p>[29] L. Buesing, et al. <em>Learning and Querying Fast Generative Models for Reinforcement Learning</em>. arXiv: Learning. 2018</p>
+<p>[30] R. Pascanu, et al. <em>Learning model-based planning from scratch</em>. arXiv preprint arXiv:1707.06170. 2017</p>
+<p>[31] S. Racanière, et al. <em>Imagination-Augmented Agents for Deep Reinforcement Learning</em>. 2017</p>
+<p>[32] D. Ha and J. Schmidhuber. <em>World Models</em>. arXiv: Learning. 2018</p>
+<p>[33] J. Schrittwieser, et al. <em>Mastering Atari, Go, chess and shogi by planning with a learned model</em>. Nature, 588. 604–609. 2020</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+<section>
+    <h6 style="display:none;">Comments</h6>
+    <p id="comment-message"> </p>
+
+    <div class="accordion" id="accordion2">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
+                   data-toggle="collapse"
+                   data-parent="#accordion2"
+                   data-disqus-identifier="https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html"
+                   href="https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html#comment_thread"
+                   id="comment-accordion-toggle">
+                    Comments
+                </a>
+            </div>
+            <div id="comment_thread" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <div class="comments">
+                        <div id="disqus_thread"></div>
+                        <script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = 'https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html';
+    this.page.identifier = 'https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html';
+    };
+     */
+    var disqus_identifier = 'https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html';
+    var disqus_url = 'https://gregorsemmler.github.io/state-of-the-art-model-based-reinforcement-learning.html';
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = 'https://gregor-s.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2023-05-10T17:09:00+02:00">Mi 10 Mai 2023</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+</main>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://gregorsemmler.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+        <script src="https://files.stork-search.net/releases/v1.5.0/stork.js"></script>
+        <script>
+            stork.register("sitesearch", "https://gregorsemmler.github.io/search-index.st")
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

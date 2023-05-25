@@ -20,15 +20,15 @@
 <meta property="og:title" content="Learning to pay attention "/>
 <meta property="og:url" content="https://gregorsemmler.github.io/learning-to-pay-attention.html" />
 <meta property="og:description" content="For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …" />
-<meta property="og:site_name" content="Gregor Semmler&#39;s Website" />
+<meta property="og:site_name" content="Gregor Semmler&#39;s Blog" />
 <meta property="og:article:author" content="Gregor Semmler" />
 <meta property="og:article:published_time" content="2022-10-20T16:18:00+02:00" />
 <meta name="twitter:title" content="Learning to pay attention ">
 <meta name="twitter:description" content="For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks …">
 
-        <title>Learning to pay attention  · Gregor Semmler&#39;s Website
+        <title>Learning to pay attention  · Gregor Semmler&#39;s Blog
 </title>
-        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Website - Full Atom Feed" />
+        <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Blog - Full Atom Feed" />
 
 
 
@@ -44,7 +44,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </a>
-                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Website</span></a>
+                        <a class="brand" href="https://gregorsemmler.github.io/"><span class=site-name>Gregor Semmler's Blog</span></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav pull-right top-menu">
                                 <li >
@@ -84,7 +84,7 @@
             
             <p>For visual tasks, humans and animals alike put more focus on certain parts of an observed scene. For example, when given the task to detect whether a given image of an animal displays or a dog or cat, one might focus at the nose, eyes or ears. Convolutional neural networks have achieved remarkable results in various applications in recent years. However, for a human observer it is mostly incomprehensible how the neural network has come to its conclusion, therefore not allowing deeper analysis of both correct and incorrect outputs. If we could teach a machine learning model to learn to pay attention to specific parts of an input image it would allow us to interpret which parts are deemed most important, leading to a more interpretable and explainable process.</p>
 <h2>Attention</h2>
-<p>For this, we can use scalar matrices which show the relative importance of specific parts of the image for the given task, so-called attention maps. For image classification, for example, the attention can determine the location of the object of interest. There are a different ways to implement attention, either as a trainable mechanism or as an analysis after the fact. </p>
+<p>For this, we can use scalar matrices which show the relative importance of specific parts of the image for the given task, so-called attention maps. For image classification, for example, the attention can determine the location of the object of interest. There are different ways to implement attention, either as a trainable mechanism or as an analysis after the fact. </p>
 <p>In this case we will look at a method by Jetley et al. [1] which includes attention estimators integrated into different points of the CNN architecture.</p>
 <p><img alt="Attention mechanism" src="https://gregorsemmler.github.io/images/attention/attention_mechanism.png"> (Image from [1])</p>
 <p>The <em>local features</em> refer to the outputs from a convolutional layer within the network, while the <em>global features</em> refer to the outputs of the last layer before the final classification layer. The local features therefore have a receptive field for some local part of the image while the global features have the complete image has a receptive field. Each attention estimator has as input both local and global features.</p>

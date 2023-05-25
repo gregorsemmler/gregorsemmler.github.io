@@ -17,16 +17,16 @@
 
 <meta name="keywords" content=", Entry, " />
 
-<meta property="og:title" content="A brief introduction to Reinforcement Learning "/>
-<meta property="og:url" content="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html" />
-<meta property="og:description" content="Learning by interacting with our environment is omnipresent in human life. Most of the time we don&#39;t have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. Reinforcement Learning is learning which actions to …" />
+<meta property="og:title" content="State Space Models and Variational Inference "/>
+<meta property="og:url" content="https://gregorsemmler.github.io/state-space-models-and-variational-inference.html" />
+<meta property="og:description" content="Introduction In the last article we have looked at VAEs, how to train them and the concept of directed graphical models to represent relationships between random variables. Now we will look at state space models, an application of directed graphical models to portray sequences of random variables and how to …" />
 <meta property="og:site_name" content="Gregor Semmler&#39;s Blog" />
 <meta property="og:article:author" content="Gregor Semmler" />
-<meta property="og:article:published_time" content="2022-08-29T13:38:00+02:00" />
-<meta name="twitter:title" content="A brief introduction to Reinforcement Learning ">
-<meta name="twitter:description" content="Learning by interacting with our environment is omnipresent in human life. Most of the time we don&#39;t have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. Reinforcement Learning is learning which actions to …">
+<meta property="og:article:published_time" content="2023-02-25T15:20:00+01:00" />
+<meta name="twitter:title" content="State Space Models and Variational Inference ">
+<meta name="twitter:description" content="Introduction In the last article we have looked at VAEs, how to train them and the concept of directed graphical models to represent relationships between random variables. Now we will look at state space models, an application of directed graphical models to portray sequences of random variables and how to …">
 
-        <title>A brief introduction to Reinforcement Learning  · Gregor Semmler&#39;s Blog
+        <title>State Space Models and Variational Inference  · Gregor Semmler&#39;s Blog
 </title>
         <link href="https://gregorsemmler.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Gregor Semmler&#39;s Blog - Full Atom Feed" />
 
@@ -72,8 +72,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html">
-                A brief introduction to Reinforcement Learning
+            <a href="https://gregorsemmler.github.io/state-space-models-and-variational-inference.html">
+                State Space Models and Variational Inference
             </a>
         </h1>
     </header>
@@ -82,37 +82,77 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>Learning by interacting with our environment is omnipresent in human life. Most of the time we don't have a teacher to tell us exactly to what do in each situation. Instead, we are learning by doing and observing the outcomes of our actions. <em>Reinforcement Learning</em> is learning which actions to take in a given situation to maximize a <em>reward</em> we get from doing so. The agent must explore which actions yield the most reward by trying them out. A learner's action do not only affect the current reward but also the next state and thus all following rewards.</p>
-<p>Reinforcement learning consists of the central two parts of exploration of actions on the one hand and exploitation of rewards on the other. <em>Supervised learning</em> on the other hand, the most common form of machine learning nowadays, consists of learning from a given dataset of labeled samples. To give a correct prediction in an interactive problem, the model must be given a representative and correct sample of all situations which might occur over all time steps into the future. It is most often infeasible to achieve this through pure supervised learning.</p>
-<h2>Components of Reinforcement Learning</h2>
-<ul>
-<li>A <em>policy</em> defines which action should be taken by the agent in a given state. A policy can be deterministic (same output everytime) or stochastic (output is sampled from a probability distribution)</li>
-<li>At each time step, the agent receives a one-dimensional numerical <em>reward</em>. Maximizing the total reward an agent gains is the main target of reinforcement learning. It is the primary way of changing the policy.</li>
-<li>A <em>value function</em> predicts the total long-term reward one can expect to gain, starting from a given state. </li>
-</ul>
-<h2>Finite Markov Decision Processes</h2>
-<p>Markov decision processes define a framework for sequential decision-making which is used for reinforcement learning. In each state an action can be taken will yield a reward and lead to a new state which will then indirectly influence possible future rewards. </p>
-<p>The <em>agent</em> is the learner and decision maker and interacts with the <em>environment</em>, which consists of everything outside the agent. The agent keeps selecting actions and the environment keeps responding with a new state and a reward.</p>
-<p><img alt="Agent-Environment Interface" src="https://gregorsemmler.github.io/images/agent_environment_interaction.png"> (Figure 3.1 from [1])</p>
-<p>At each time step <span class="math">\(t = 0, 1, 2, ...\)</span> the agent receives a state <span class="math">\(S_t \in \mathcal{S}\)</span>, selects an action <span class="math">\(A_t \in \mathcal{A}(s)\)</span> and receives a numerical reward <span class="math">\(R_{t+1} \in \mathcal{R} \subset \mathbb{R}\)</span></p>
-<p>In a finite MDP, the sets <span class="math">\(\mathcal{S}\)</span>, <span class="math">\(\mathcal{A}\)</span>, and <span class="math">\(\mathcal{R}\)</span> all have a finite number of elements.</p>
-<p>The <em>dynamics</em> of the MDP is the probability of ending up in a new state <span class="math">\(s'\)</span> and receiving a reward <span class="math">\(r\)</span> given a state <span class="math">\(s\)</span> and action <span class="math">\(a\)</span>:</p>
-<p><span class="math">\(p(s', r | s, a) \doteq Pr\{S_t = s', R_t = r | S_{t-1}=s, A_{t-1}=a\}\)</span> </p>
-<p>In applications where one can define a final time step, each such subsequence of time steps is called an <em>episode</em>. Each episode ends in a so-called <em>terminal state</em>, after which a reset of the environment leads to a new start state.</p>
-<p>The <em>return</em> is the discounted sum of rewards over time:</p>
-<p><span class="math">\(G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + ... = \sum_{k=0}^{T} \gamma^k R_{t+k+1}\)</span></p>
-<p>where <span class="math">\(\gamma\)</span> with <span class="math">\(0 \leq \gamma \leq 1\)</span> is the <em>discount rate</em>, describing the fact that immediate rewards are considered more valuable than those further in the future. Here <span class="math">\(T\)</span> describe the final time step. For <em>unepisodic</em> cases, it would be replaced with <span class="math">\(\infty\)</span>. The general goal is to find the actions which result in the highest return.</p>
-<h2>Policies and Value Functions</h2>
-<p>A <em>policy</em> <span class="math">\(\pi(a|s)\)</span> is the probability of selecting an action <span class="math">\(A_t = a\)</span> if <span class="math">\(S_t = s\)</span>. It can be set as a rule set an agent follows.</p>
-<p>The <em>state-value function</em> <span class="math">\(v_\pi(s)\)</span> of a state <span class="math">\(s\)</span> for a policy <span class="math">\(\pi\)</span> is the expected return when starting in <span class="math">\(s\)</span> and following <span class="math">\(\pi\)</span> thereafter.</p>
-<p><span class="math">\(v_\pi(s) \doteq \mathbb{E}_\pi\left[G_t | S_t = s\right] = \mathbb{E}_\pi\left[\sum_{k=0}^\infty\gamma^k R_{t+k+1}| S_t = s\right]\)</span> 
-for all <span class="math">\(s \in \mathcal{S}\)</span>.</p>
-<p>The <em>action-value function</em> <span class="math">\(q_\pi(s, a)\)</span> is the expected return starting from state <span class="math">\(s\)</span>, taking action <span class="math">\(a\)</span> and thereafter following the policy <span class="math">\(\pi\)</span>:</p>
-<p><span class="math">\(q_\pi(s, a) \doteq \mathbb{E}_\pi\left[G_t | S_t = s, A_t = a\right] = \mathbb{E}_\pi\left[\sum_{k=0}^{\infty}{\gamma^k R_{t+k+1}}|S_t=s, A_t=a\right]\)</span></p>
-<h2>Conclusion</h2>
-<p>There are various methods which try to improve an approximation to the value function or the action-value function to then decide which are the optimal actions to take. Other approaches directly learn an approximation of the policy. These topics will be covered in more detail in the future. This concludes the first part of my Introduction to Reinforcement Learning.</p>
-<h3>References</h3>
-<p>[1] R. S. Sutton and A. G. Barto. <em>Reinforcement learning: An introduction</em>. MIT Press, 2018</p>
+            <h2>Introduction</h2>
+<p>In the last article we have looked at VAEs, how to train them and the concept of directed graphical models to represent relationships between random variables. Now we will look at state space models, an application of directed graphical models to portray sequences of random variables and how to extend the principles of VAEs to them.</p>
+<h2>State Space Models</h2>
+<p>State space models (SSM) consists of several types of real-valued random variables. Here, we denote the hidden real-valued variables as <span class="math">\(s_t\)</span>, the input variables (action) as <span class="math">\(a_t\)</span>, and the output variables <span class="math">\(o_t\)</span> (which are the reconstructed observations) for each discrete-valued time step <span class="math">\(t\)</span>. 
+They can be represented as directed graphical models, where each node represents a random variable, and an edge represents a conditional dependency [1].</p>
+<h3>Kalman Filter</h3>
+<p>A special case are linear-gaussian SSMs [1], also known as linear dynamical systems. In this case, the transition and observation models are linear, with added Gaussian noise. In particular, the transition model has the form
+</p>
+<div class="math">$$\mathbf{s}_{t}=\mathbf{A}_{t}\mathbf{s}_{t-1}+\mathbf{B}_{t}\mathbf{a}_{t}+ {\mathcal{N}}(\mathbf{0},\mathbf{Q}_{t})$$</div>
+<p>
+And the observation model has the form
+</p>
+<div class="math">$$\mathbf{o}_{t}=\mathbf{C}_{t}\mathbf{s}_{t}+\mathbf{D}_{t}\mathbf{a}_{t}+ {\mathcal{N}}(\mathbf{0},\mathbf{R}_{t})$$</div>
+<p>
+Where <span class="math">\(\mathbf{A_t, B_t, C_t, D_t, Q_t, R_t}\)</span> are matrices of appropriate size. If they are independent of the time, the model is called <strong>stationary</strong> and we can drop the time index <span class="math">\(t\)</span>.
+Often, we model the observations to only be dependent on the latent variables, so in this case the second equation simplifies to
+</p>
+<div class="math">$$\mathbf{o}_{t}=\mathbf{C}_{t}\mathbf{s}_{t} + {\mathcal{N}}(\mathbf{0},\mathbf{R}_{t})$$</div>
+<p>
+Combined with a stationary model we get the transition model
+</p>
+<div class="math">$$\mathbf{s}_t =\mathbf{A} \mathbf{s}_{t-1}+\mathbf{B}\mathbf{a}_{t}+ {\mathcal{N}}(\mathbf{0},\mathbf{Q})$$</div>
+<p>
+and observation model
+</p>
+<div class="math">$$\mathbf{o}_{t}=\mathbf{C} \mathbf{s}_{t} + {\mathcal{N}}(\mathbf{0},\mathbf{R})$$</div>
+<p>We can represent this as a graphical model:</p>
+<p><img alt="ssm_example" src="https://gregorsemmler.github.io/images/model_learning/ssm_example.png"></p>
+<p>The <strong>kalman filter</strong> allows to solve this exactly. We can predict the hidden state <span class="math">\(s_t\)</span> based on the history of the previous observations <span class="math">\(\mathbf{o_{1:t-1}}\)</span> and actions <span class="math">\(\mathbf{a_{1:t}}\)</span> [1]. </p>
+<div class="math">$$p(\mathbf{s}_{t}|\mathbf{o_{1:t-1}},\mathbf{a_{1:t}}) = {\mathcal{N}}(s_{t}|\mu_{t},\Sigma_{t}) = \int_{-\infty}^{\infty} \mathcal{N}(\mathbf{s}_{t}|\mathbf{A}_{t}\mathbf{s}_{t-1}+\mathbf{B}_{t}\mathbf{a}_{t},\mathbf{Q}_{t})\mathcal{N}(\mathbf{s}_{t-1}|\mu_{t-1},\mathbf{\Sigma}_{t-1})d\mathbf{s}_{t-1}$$</div>
+<h2>Variational Autoencoders for State Space Models</h2>
+<p>The original VAE does not contain temporal information, so the encoder learns a latent representation where each data point is independent of its time index <span class="math">\(t\)</span>, so no transition information is contained. Several works have tried to extend the unsupervised representation learning to correlated temporal sequences in the years after [2-12].
+These approaches all vary in how they define the dependencies between the observed and latent variables and their generative and inference models. Recurrent neural networks are also used as part of the generative and inference models. 
+But all models use the basic VAE approach of an inference model and the maximization of a variational lower bound. They all also use continuous latent random variables and use discrete time steps of observed and latent random vectors. </p>
+<h3>Learning</h3>
+<p>We now consider models which handle the case where we have a sequence of observations <span class="math">\(o_{1:T}\)</span>, of latent variables (or states) <span class="math">\(s_{1:T}\)</span>, and (optionally) of actions <span class="math">\(a_{1:T}\)</span>. In general, we assume that the variables within those sequences are correlated with each other. 
+The structure of the dependencies of the variables is usually written as a product of conditional distributions using the chain rule. Here, the different orderings can be chosen which allows for different sampling processes and implementations. 
+Often it is assumed that the distribution of a variable at time <span class="math">\(t\)</span> only depends on other variables of time <span class="math">\(t\)</span> or earlier.</p>
+<p>We usually assume that the actions are deterministic, so we are interested only interested in the distributions over the observations and latent variables. So, we can model the joint distribution of observations and latent variables, conditioned on the actions according to the chain rule, following the time steps <span class="math">\(t\)</span>, as [13]
+</p>
+<div class="math">$$p({\bf o}_{1:T},{\bf s}_{1:T}\vert{\bf a}_{1:T})=\prod_{t=1}^{T}p({\bf o}_{t},{\bf s}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t}) =$$</div>
+<div class="math">$$= \prod_{t=1}^{T}p({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t},{\bf a}_{1:t})p({\bf s}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t})$$</div>
+<p>The implementation is done with a combination of feedforward neural networks and recurrent neural networks (RNNs). The latter are used to capture the aggregated previous data (for example the past states). How this works is that an internal state variable <span class="math">\(h_t\)</span> of the RNN is computed at each time step <span class="math">\(t\)</span>. We can denote such implementations by including <em>deterministic</em> nodes in our graphical model for these state variables.</p>
+<p>According to the chain rule, the posterior distribution of the hidden states can be written as
+</p>
+<div class="math">$$p_{\theta}(\mathbf{s}_{1:T} | \mathbf{o}_{1:T},\mathbf{a}_{1:T})=\prod_{t=1}^{T}p_{\theta}(\mathbf{s}_{t}|\mathbf{s}_{1:t-1},\mathbf{o}_{1:T},\mathbf{a}_{1:T})$$</div>
+<p>
+Depending on the conditional dependencies of the model, this can be simplified.</p>
+<p>The VLB in this case can be derived analogously to the standard VAE case above. Combined with the above factorization, we arrive at </p>
+<div class="math">$$\mathcal{L}(\theta,\phi;{\bf o}_{1:T},{\bf a}_{1:T})=\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_{\theta}({\bf o}_{1:T},{\bf s}_{1:T}|{\bf a}_{1:T}) - \log q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})\big] =
+$$</div>
+<div class="math">$$= \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[\log p_\theta({\bf o}_{t}\vert{\bf o}_{1:t-1},{\bf s}_{1:t},{\bf a}_{1:t})\big]} -$$</div>
+<div class="math">$$ - \sum_{t=1}^{T}{\mathbb{E}_{q_{\phi}({\bf s}_{1:T}|{\bf o}_{1:T},{\bf a}_{1:T})}\big[D_{\mathrm{KL}}\big( q_\phi({\bf s}_t|{\bf s}_{1:t-1}, {\bf o}_{1:T},{\bf a}_{1:T})\parallel\ p_{\theta}({\bf s}_t|{\bf o}_{1:t-1},{\bf s}_{1:t-1},{\bf a}_{1:t})\big)\big]}$$</div>
+<p>
+Again, the first addend can be interpreted as a construction error and the second as a regularization error. In contrast to a VAE, both terms are intractable and need to be estimated, for example with a Monte Carlo sampling approach.</p>
+<h2>Summary</h2>
+<p>We have now introduced the concept of state space models and derived the general loss function we can use for extended versions of a VAE, designed for state space models and sequences of random variables. In <a href="https://gregorsemmler.github.io/variational-autoencoders-for-state-space-models.html">the next article</a>, we will cover several examples of these in more detail.</p>
+<h2>References</h2>
+<p>[1] K. P. Murphy. <em>Machine learning: a probabilistic perspective</em>. 2012</p>
+<p>[2] J. Bayer and C. Osendorfer. <em>Learning Stochastic Recurrent Networks</em>. ArXiv. 2014</p>
+<p>[3] R. G. Krishnan, U. Shalit and D. Sontag. <em>Deep kalman filters</em>. arXiv preprint arXiv:1511.05121. 2015</p>
+<p>[4] J. Chung, et al. <em>A recurrent latent variable model for sequential data</em>. Advances in neural information processing systems, 28. 2015</p>
+<p>[5] M. Fraccaro, et al. <em>Sequential neural models with stochastic layers</em>. Advances in neural information processing systems, 29. 2016</p>
+<p>[6] R. Krishnan, U. Shalit and D. Sontag. <em>Structured Inference Networks for Nonlinear State Space Models</em>. Proceedings of the AAAI Conference on Artificial Intelligence, 31. 2017</p>
+<p>[7] M. Fraccaro, et al. <em>A Disentangled Recognition and Nonlinear Dynamics Model for Unsupervised Learning</em>. Advances in neural information processing systems, 30. 3601-3610. 2017</p>
+<p>[8] M. Karl, et al. <em>Deep Variational Bayes Filters: Unsupervised Learning of State Space Models from Raw Data</em>. arXiv preprint arXiv:1605.06432. 2017</p>
+<p>[9] A. Goyal, et al. <em>Z-Forcing: Training Stochastic Recurrent Networks</em>. ArXiv. 2017</p>
+<p>[10] W. Hsu, Y. Zhang and J. R. Glass. <em>Unsupervised Learning of Disentangled and Interpretable Representations from Sequential Data</em>. 2017</p>
+<p>[11] Y. Li and S. Mandt. <em>Disentangled Sequential Autoencoder</em>. 2018</p>
+<p>[12] S. Leglaive, et al. <em>A Recurrent Variational Autoencoder for Speech Enhancement</em>. ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP). 371-375. 2020</p>
+<p>[13] L. Girin, et al. <em>Dynamical variational autoencoders: A comprehensive review</em>. arXiv preprint arXiv:2008.12595. 2020</p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -199,8 +239,8 @@ for all <span class="math">\(s \in \mathcal{S}\)</span>.</p>
                 <a class="accordion-toggle disqus-comment-count comment-count collapsed"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html"
-                   href="https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html#comment_thread"
+                   data-disqus-identifier="https://gregorsemmler.github.io/state-space-models-and-variational-inference.html"
+                   href="https://gregorsemmler.github.io/state-space-models-and-variational-inference.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -215,12 +255,12 @@ for all <span class="math">\(s \in \mathcal{S}\)</span>.</p>
      *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
     /*
     var disqus_config = function () {
-    this.page.url = 'https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html';
-    this.page.identifier = 'https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html';
+    this.page.url = 'https://gregorsemmler.github.io/state-space-models-and-variational-inference.html';
+    this.page.identifier = 'https://gregorsemmler.github.io/state-space-models-and-variational-inference.html';
     };
      */
-    var disqus_identifier = 'https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html';
-    var disqus_url = 'https://gregorsemmler.github.io/a-brief-introduction-to-reinforcement-learning.html';
+    var disqus_identifier = 'https://gregorsemmler.github.io/state-space-models-and-variational-inference.html';
+    var disqus_url = 'https://gregorsemmler.github.io/state-space-models-and-variational-inference.html';
     (function() { // DON'T EDIT BELOW THIS LINE
         var d = document, s = d.createElement('script');
         s.src = 'https://gregor-s.disqus.com/embed.js';
@@ -244,7 +284,7 @@ for all <span class="math">\(s \in \mathcal{S}\)</span>.</p>
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2022-08-29T13:38:00+02:00">Mo 29 August 2022</time>
+            <time itemprop="dateCreated" datetime="2023-02-25T15:20:00+01:00">Sa 25 Februar 2023</time>
             <h4>Category</h4>
             <a class="category-link" href="https://gregorsemmler.github.io/categories#entry-ref">Entry</a>
 <h4>Contact</h4>
